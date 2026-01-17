@@ -9,6 +9,8 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         /* --- CORE THEME --- */
+        * { -webkit-tap-highlight-color: transparent; } /* Removes Blue Highlight */
+
         :root {
             --bg-dark: #090a0f;
             --glass-bg: rgba(255, 255, 255, 0.05);
@@ -32,7 +34,7 @@
             -moz-user-select: none; /* Firefox */
             -ms-user-select: none; /* IE10+/Edge */
             user-select: none; /* Standard */
-            -webkit-touch-callout: none; /* iOS Safari - prevents menu on long press */
+            -webkit-touch-callout: none; /* iOS Safari */
         }
 
         /* --- 1. HEADER --- */
@@ -241,22 +243,17 @@
     </form>
 
     <script>
-        // --- SOUND SYSTEM (Base64 for Performance) ---
-        // Soft Click/Tap Sound
-        const tapSound = new Audio("data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
-        // Real Base64 "Blip"
-        const blip = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+        // --- SOUND SYSTEM (Soft Pop) ---
+        // Reads 'soundEnabled' from localStorage to respect profile settings
+        const popSound = new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAACAAAAA//8AAP//AAAAAA=="); 
         
-        // Success Chime (Short)
-        const chime = new Audio("data:audio/mp3;base64,//uQZAAAAAAAABAAAAAAAAAAAAAA=="); // Placeholder for length, using generic beep logic below if fails, but trying to keep it light.
-        // Actually, let's just use the blip for interactions to keep it pro and fast.
-        
-        function playSound(type) {
-            // Reset to allow rapid firing
-            blip.currentTime = 0;
-            // Lower volume for subtle effect
-            blip.volume = 0.3; 
-            blip.play().catch(e => {});
+        function playSound() {
+            const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
+            if(isSoundOn) { 
+                const sound = popSound.cloneNode();
+                sound.volume = 0.3; 
+                sound.play().catch(e => {}); 
+            }
         }
 
         // --- CONFIG ---
@@ -289,6 +286,7 @@
         };
 
         function attemptExit() {
+            playSound();
             if(!isSubmitted) {
                 if(confirm("⚠️ Warning: Your progress will be lost if you exit now.\n\nAre you sure?")) {
                     window.location.href = 'index.html';
@@ -299,6 +297,7 @@
         }
 
         function exitSafely() {
+            playSound();
             isSubmitted = true; // Ensure logic knows we are safe
             window.location.href = 'index.html';
         }
@@ -513,6 +512,7 @@
         }
 
         function reviewAnswers() {
+            playSound();
             isReviewMode = true;
             document.getElementById('resultModal').style.display = 'none';
             loadQuestion(0);
@@ -520,6 +520,7 @@
 
         // --- REPORTING ---
         function sendReport() {
+            playSound();
             const issue = document.getElementById('report-text').value;
             if(!issue) return alert("Please type something.");
             
