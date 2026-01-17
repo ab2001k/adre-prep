@@ -8,7 +8,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png" />
+    
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
@@ -38,7 +40,7 @@
             color: var(--text-color); 
             min-height: 100vh; 
             overflow-x: hidden;
-            /* DISABLE SELECTION (Make Non-Copiable) */
+            /* DISABLE SELECTION */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -81,100 +83,32 @@
         .chapter-item.locked-referral { border-left: 4px solid #ffcc00; opacity: 0.8; }
         .chapter-item.locked-referral .lock-indicator { color: #ffcc00; }
         
-        /* --- LEADERBOARD STYLES (IMPROVED) --- */
-        .leaderboard-container { 
-            margin-top: 40px; 
-            background: rgba(13, 14, 20, 0.6); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 20px; 
-            overflow: hidden; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .lb-title { 
-            text-align: center; 
-            font-size: 20px; 
-            color: var(--neon-blue); 
-            padding: 20px 0 10px 0; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            font-weight: 700;
-        }
-        
-        /* Header Row */
-        .lb-header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: #888;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .lb-list { 
-            list-style: none; 
-            padding: 0; 
-            margin: 0;
-            max-height: 400px; 
-            overflow-y: auto; 
-            /* Custom Scrollbar */
-            scrollbar-width: thin; 
-            scrollbar-color: #333 transparent;
-        }
-        
-        .lb-list::-webkit-scrollbar { width: 6px; }
-        .lb-list::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-
-        .lb-item { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 12px 20px; 
-            border-bottom: 1px solid rgba(255,255,255,0.03); 
-            align-items: center; 
-            transition: 0.2s;
-        }
+        /* LEADERBOARD */
+        .leaderboard-container { margin-top: 40px; background: rgba(13, 14, 20, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .lb-title { text-align: center; font-size: 20px; color: var(--neon-blue); padding: 20px 0 10px 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .lb-header { display: flex; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); color: #888; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .lb-list { list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #333 transparent; }
+        .lb-list::-webkit-scrollbar { width: 6px; } .lb-list::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        .lb-item { display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; transition: 0.2s; }
         .lb-item:hover { background: rgba(255,255,255,0.03); }
-
         .lb-left-grp { display: flex; align-items: center; gap: 15px; flex: 1; }
-
-        /* Rank */
-        .lb-rank { 
-            width: 25px; font-weight: bold; color: #666; font-size: 14px; text-align: center;
-        }
-        
-        /* Avatar */
-        .lb-avatar {
-            width: 32px; height: 32px; 
-            background: linear-gradient(135deg, #333, #555);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: bold; color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .lb-name { 
-            text-align: left; font-size: 14px; color: #ddd; 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;
-        }
+        .lb-rank { width: 25px; font-weight: bold; color: #666; font-size: 14px; text-align: center; }
+        .lb-avatar { width: 32px; height: 32px; background: linear-gradient(135deg, #333, #555); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #fff; border: 1px solid rgba(255,255,255,0.1); object-fit: cover; }
+        .lb-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .lb-name { text-align: left; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
         .lb-score { font-weight: bold; color: #00ff88; font-size: 14px; }
-
-        /* MEDALS - TOP 3 */
         .rank-1 .lb-rank { content: "🥇"; font-size: 20px; text-indent: -1000px; position: relative; } 
         .rank-1 .lb-rank::after { content: "🥇"; position: absolute; top: -5px; left: 0; text-indent: 0; } 
         .rank-1 { background: rgba(255, 215, 0, 0.1); border-left: 3px solid #ffd700; }
         .rank-1 .lb-avatar { background: #ffd700; color: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); border:none; }
-
         .rank-2 .lb-rank { content: "🥈"; font-size: 20px; text-indent: -1000px; position: relative; } 
         .rank-2 .lb-rank::after { content: "🥈"; position: absolute; top: -5px; left: 0; text-indent: 0; } 
         .rank-2 { background: rgba(192, 192, 192, 0.1); border-left: 3px solid #c0c0c0; }
         .rank-2 .lb-avatar { background: #c0c0c0; color: #000; box-shadow: 0 0 10px rgba(192, 192, 192, 0.4); border:none; }
-
         .rank-3 .lb-rank { content: "🥉"; font-size: 20px; text-indent: -1000px; position: relative; } 
         .rank-3 .lb-rank::after { content: "🥉"; position: absolute; top: -5px; left: 0; text-indent: 0; } 
         .rank-3 { background: rgba(205, 127, 50, 0.1); border-left: 3px solid #cd7f32; }
         .rank-3 .lb-avatar { background: #cd7f32; color: #000; box-shadow: 0 0 10px rgba(205, 127, 50, 0.4); border:none; }
-
 
         /* MODALS */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
@@ -182,6 +116,20 @@
         .input-field { width: 90%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #222; color: white; margin-bottom: 12px; font-family: 'Outfit', sans-serif; }
         .submit-btn { background: var(--neon-blue); color: #000; border: none; width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
+        /* PROFILE MODAL & UPLOAD */
+        .profile-img-large { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--neon-blue); margin: 0 auto 10px; cursor: pointer; background: #333; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .profile-img-large img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-img-large:hover::after { content: "📷"; position: absolute; background: rgba(0,0,0,0.5); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; }
+        
+        /* TOGGLE SWITCH */
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--neon-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         /* DEV & FEEDBACK STYLES */
         .dev-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-blue); margin-bottom: 10px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
         .dev-role { color: #aaa; font-size: 12px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; display: block;}
@@ -190,7 +138,8 @@
         textarea { width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 10px; color: white; padding: 10px; font-family: 'Outfit', sans-serif; margin-top: 10px; box-sizing: border-box; resize: none; }
     </style>
 </head>
-<body oncontextmenu="return false;"> 
+<body oncontextmenu="return false;">
+
     <div id="perm-warning">
         ⚠️ Notifications are blocked. Click the <b>Padlock icon</b> in your address bar to Allow them for Exam Updates.
     </div>
@@ -209,7 +158,7 @@
         </div>
         <div class="header-actions">
             <button id="login-btn" class="login-btn-header" onclick="openLogin()" style="display:none;">Login</button>
-            <button id="profile-btn" class="user-badge" onclick="window.location.href='profile.html'">Hi, Student</button>
+            <button id="profile-btn" class="user-badge">Hi, Student</button>
             <div class="notif-btn" onclick="toggleSidebar()">
                 🔔 <div class="red-dot"></div>
             </div>
@@ -269,19 +218,41 @@
         </div>
     </div>
 
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span onclick="document.getElementById('profile-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
+            <h2 style="margin-top:0;">Your Profile</h2>
+            
+            <div class="profile-img-large" onclick="document.getElementById('avatar-upload').click()">
+                <span id="avatar-initials" style="font-size:24px; font-weight:bold; color:#fff;">?</span>
+            </div>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+            
+            <h3 id="profile-name-display" style="margin:5px 0;">Student Name</h3>
+            <p style="font-size:12px; color:#888;">Tap image to change</p>
+
+            <div class="toggle-row">
+                <span>🔊 Button Sounds</span>
+                <label class="switch">
+                    <input type="checkbox" id="sound-toggle" checked onchange="toggleSound(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <button onclick="logout()" class="submit-btn" style="background:transparent; border:1px solid #ff4b4b; color:#ff4b4b; margin-top:20px;">Log Out</button>
+        </div>
+    </div>
+
     <div id="about-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:400px; max-height:80vh; overflow-y:auto;">
             <span onclick="document.getElementById('about-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
-            
             <span class="dev-role">Developer</span>
             <img src="image.jpg" alt="Dev" class="dev-avatar">
             <h3 style="margin: 5px 0; color: white;">Abhik Dutta</h3>
             <span style="color: #aaa; font-size: 12px;">B.Voc in IT</span>
             <p class="dev-bio">"Hi, I built ADRE 3.0 Prep to make education free and accessible for all. Best of luck!"</p>
             <a href="mailto:Abhikdutta639@gmail.com" class="dev-contact">📧 Abhikdutta639@gmail.com</a>
-            
             <hr style="border:1px solid #333; margin:15px 0;">
-
             <h3 style="margin-top:0; font-size:16px;">💡 Suggestions?</h3>
             <form id="feedback-form" action="https://formspree.io/f/xeeqqanb" method="POST" onsubmit="handleFeedback(event)">
                 <input type="hidden" name="name" id="hidden-name">
@@ -298,9 +269,9 @@
             <div style="font-size:40px; margin-bottom:10px;">🔒</div>
             <h2 style="color:var(--neon-blue);">Unlock Premium Mocks</h2>
             <p style="color:#ccc; font-size:14px; margin-bottom:20px;">Tests take effort to create. Help us grow by sharing with 5 friends.</p>
-            
             <button onclick="shareOnWhatsApp()" class="submit-btn" style="background:#25D366; color:white; display:flex; align-items:center; justify-content:center; gap:10px;">
-                <span>🚀 Share on WhatsApp</span>
+                <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i>
+                <span>Share on WhatsApp</span>
             </button>
             <button onclick="document.getElementById('share-modal').style.display='none'" style="background:transparent; border:none; color:#aaa; margin-top:10px; cursor:pointer;">Close</button>
         </div>
@@ -337,8 +308,27 @@
         let currentUser = null; 
         let tempEmail = ""; 
         let shareStartTime = 0; 
+        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false'; // Default True
 
-        // --- 1. DYNAMIC SUBJECT LOADER ---
+        // --- 1. SOUND & SETTINGS ---
+        // New Reliable Pop Sound (Base64)
+        const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=");
+        // A real short blip sound
+        const realPop = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+
+        function playClick() {
+            if(!soundEnabled) return;
+            realPop.currentTime = 0;
+            realPop.play().catch(e => {});
+        }
+
+        function toggleSound(checkbox) {
+            soundEnabled = checkbox.checked;
+            localStorage.setItem('soundEnabled', soundEnabled);
+            if(soundEnabled) playClick();
+        }
+
+        // --- 2. DYNAMIC SUBJECT LOADER ---
         async function openSubject(subjectName) { 
             document.getElementById('home-page').style.display = 'none';
             document.getElementById('subject-page').style.display = 'block';
@@ -354,13 +344,10 @@
                 if (!response.ok) throw new Error("Menu Sheet not found");
                 const data = await response.text();
                 const rows = data.split(/\r?\n/).slice(1);
-                
-                let html = "";
-                let count = 0; 
+                let html = "", count = 0; 
 
                 rows.forEach(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-                    
                     if(cols.length >= 4) {
                         const rowSubject = cols[0];
                         const btnName = cols[1];
@@ -368,17 +355,12 @@
                         const type = cols[3];
 
                         if(rowSubject === subjectName) {
-                            let isLocked = false;
-                            if (type !== 'PDF' && count > 0 && !isUnlocked) {
-                                isLocked = true;
-                            }
-
+                            let isLocked = (type !== 'PDF' && count > 0 && !isUnlocked);
                             if(type === 'PDF') {
                                 html += `<li class="chapter-item" onclick="window.open('${value}', '_blank')"><span>${btnName}</span><span class="lock-indicator">📄</span></li>`;
                             } else {
-                                if(isLocked) {
-                                    html += `<li class="chapter-item locked-referral" onclick="openShareModal()"><span>${btnName}</span><span class="lock-indicator">🔒</span></li>`;
-                                } else {
+                                if(isLocked) html += `<li class="chapter-item locked-referral" onclick="openShareModal()"><span>${btnName}</span><span class="lock-indicator">🔒</span></li>`;
+                                else {
                                     let lockIcon = currentUser ? "👉" : "🔒"; 
                                     html += `<li class="chapter-item" onclick="attemptOpen('exam.html?id=${value}&subject=${subjectName}', true)"><span>${btnName}</span><span class="lock-indicator">${lockIcon}</span></li>`;
                                 }
@@ -387,47 +369,34 @@
                         }
                     }
                 });
-
                 listContainer.innerHTML = (count === 0) ? `<p style="text-align:center; color:#666;">No content added for ${subjectName} yet.</p>` : html;
                 updateAttemptedVisuals();
-
             } catch (e) {
                 console.error(e);
                 listContainer.innerHTML = '<p style="text-align:center; color:red;">Failed to load menu.</p>';
             }
         }
 
-       // --- 2. REFERRAL & ABOUT LOGIC (FIXED) ---
+       // --- 3. REFERRAL & ABOUT LOGIC ---
         function openAbout() { document.getElementById('about-modal').style.display='flex'; }
         function openShareModal() { document.getElementById('share-modal').style.display = 'flex'; }
 
         function shareOnWhatsApp() {
             document.getElementById('share-error-modal').style.display = 'none';
-            // UPDATED: Changed the link from netlify.app to your github.io URL
             const message = "Hey! I found this amazing free Mock Test app for ADRE 3.0. Practicing here helps a lot! Check it out: https://ab2001k.github.io/adre-prep/";
             const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-            
             shareStartTime = Date.now(); 
             window.open(url, '_blank');
-            
-            // FIX: Wait 1 second before listening for return. 
-            // This prevents the browser from triggering "failed" immediately.
             setTimeout(() => {
-                // Listen for both visibility change (Mobile) and focus (Desktop)
                 document.addEventListener("visibilitychange", checkShareSuccess, { once: true });
                 window.addEventListener("focus", checkShareSuccess, { once: true });
             }, 1000);
         }
 
         function checkShareSuccess() {
-            // Clean up listeners to prevent double-firing
             document.removeEventListener("visibilitychange", checkShareSuccess);
             window.removeEventListener("focus", checkShareSuccess);
-
             const timeSpent = Date.now() - shareStartTime;
-            
-            // LOGIC: If they return in less than 2.5 seconds (2500ms), they didn't share.
-            // (Lowered from 3000ms to be smoother)
             if(timeSpent < 2500) {
                 document.getElementById('share-modal').style.display = 'none';
                 document.getElementById('share-error-modal').style.display = 'flex';
@@ -436,14 +405,12 @@
                 document.getElementById('share-modal').style.display = 'none';
                 document.getElementById('share-error-modal').style.display = 'none';
                 alert("🎉 Content Unlocked! Thank you for sharing.");
-                
-                // Reload current subject to update lock icons
                 const currentTitle = document.getElementById('subject-title').innerText.replace(" Prep", "");
                 openSubject(currentTitle);
             }
         }
 
-        // --- 3. AUTHENTICATION ---
+        // --- 4. AUTHENTICATION & PROFILE ---
         async function sendOtp() {
             const name = document.getElementById('name-input').value;
             const email = document.getElementById('email-input').value;
@@ -474,7 +441,38 @@
             }
         }
 
-        // --- 4. UTILITIES ---
+        // Profile Picture Upload
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if(!file || !currentUser) return;
+            
+            // Upload to 'avatars' bucket
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${currentUser.id}-${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            // 1. Upload
+            const { error: uploadError } = await _supabase.storage.from('avatars').upload(filePath, file);
+            if(uploadError) { alert("Upload Failed: Create 'avatars' bucket in Supabase."); return; }
+
+            // 2. Get URL
+            const { data } = _supabase.storage.from('avatars').getPublicUrl(filePath);
+            const publicUrl = data.publicUrl;
+
+            // 3. Update Profile
+            await _supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
+            
+            // 4. Update UI
+            document.querySelector('.profile-img-large').innerHTML = `<img src="${publicUrl}">`;
+            alert("Profile Picture Updated!");
+        }
+
+        async function logout() {
+            await _supabase.auth.signOut();
+            location.reload();
+        }
+
+        // --- 5. UTILITIES ---
         function getStorageKey() { return currentUser ? "attempts_" + currentUser.id : "attempts_guest"; }
         
         function attemptOpen(url, req) {
@@ -503,22 +501,27 @@
         function loadLeaderboard() {
             const list = document.getElementById('leaderboard-list');
             if(!list) return;
-            _supabase.from('profiles').select('full_name, total_score').eq('is_public', true).order('total_score', { ascending: false }).limit(50)
+            _supabase.from('profiles').select('full_name, total_score, avatar_url').eq('is_public', true).order('total_score', { ascending: false }).limit(50)
             .then(({ data }) => {
                 list.innerHTML = "";
                 if(!data || data.length === 0) list.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">No scores yet.</p>';
                 else data.forEach((user, index) => {
                     let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
                     
-                    // Generate Initials
-                    let initials = user.full_name ? user.full_name.charAt(0).toUpperCase() : "?";
+                    // Display Avatar or Initials
+                    let avatarHtml = "";
+                    if(user.avatar_url) {
+                        avatarHtml = `<img src="${user.avatar_url}" alt="A">`;
+                    } else {
+                        let initials = user.full_name ? user.full_name.charAt(0).toUpperCase() : "?";
+                        avatarHtml = initials;
+                    }
                     
-                    // New Structure
                     list.innerHTML += `
                     <li class="lb-item ${rankClass}">
                         <div class="lb-left-grp">
                             <span class="lb-rank">${index + 1}</span>
-                            <div class="lb-avatar">${initials}</div>
+                            <div class="lb-avatar">${avatarHtml}</div>
                             <span class="lb-name">${user.full_name}</span>
                         </div>
                         <span class="lb-score">${user.total_score || 0} pts</span>
@@ -557,7 +560,7 @@
             } catch(e) {}
         }
 
-        // --- 5. PWA INSTALL LOGIC ---
+        // --- 6. PWA INSTALL ---
         if ('serviceWorker' in navigator) {
             const link = document.createElement('link'); link.rel = 'manifest'; link.href = 'manifest.json'; document.head.appendChild(link);
             navigator.serviceWorker.register('sw.js');
@@ -580,97 +583,79 @@
         window.addEventListener('appinstalled', () => { installPopup.style.display = 'none'; deferredPrompt = null; });
 
         // --- INIT ---
-    window.onload = async function() {
-    // 1. Check if user is logged in
-    const { data: { user } } = await _supabase.auth.getUser();
+        window.onload = async function() {
+            // Apply Sound Settings
+            document.getElementById('sound-toggle').checked = soundEnabled;
 
-    // GET BUTTONS
-    const loginBtn = document.getElementById('login-btn');
-    const profileBtn = document.getElementById('profile-btn');
+            const { data: { user } } = await _supabase.auth.getUser();
+            const loginBtn = document.getElementById('login-btn');
+            const profileBtn = document.getElementById('profile-btn');
 
-    if (!user) {
-        // --- GUEST MODE ---
-        if(loginBtn) loginBtn.style.display = 'block';
-        if(profileBtn) profileBtn.style.display = 'none';
-        
-        loadLeaderboard();
-        loadNotifications();
-        return; 
-    }
+            if (!user) {
+                if(loginBtn) loginBtn.style.display = 'block';
+                if(profileBtn) profileBtn.style.display = 'none';
+                loadLeaderboard();
+                loadNotifications();
+                return; 
+            }
 
-    // --- LOGGED IN MODE ---
-    currentUser = user; 
-    if(loginBtn) loginBtn.style.display = 'none';
-    
-    if (profileBtn) {
-        profileBtn.style.display = 'block'; 
-        profileBtn.onclick = function() { window.location.href = 'profile.html'; };
-
-        // Fetch Name
-        let displayName = "Student"; 
-        try {
-            const { data: profile } = await _supabase
-                .from('profiles').select('full_name').eq('id', user.id).single();
+            currentUser = user; 
+            if(loginBtn) loginBtn.style.display = 'none';
             
-            if (profile && profile.full_name) displayName = profile.full_name;
-            else if (user.user_metadata.full_name) displayName = user.user_metadata.full_name;
-        } catch (error) { console.log(error); }
+            if (profileBtn) {
+                profileBtn.style.display = 'block'; 
+                // UPDATED: Opens Modal instead of navigating
+                profileBtn.onclick = function() { document.getElementById('profile-modal').style.display='flex'; };
 
-        profileBtn.innerText = `Hi, ${displayName}`;
-    }
+                let displayName = "Student"; 
+                try {
+                    const { data: profile } = await _supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
+                    if (profile) {
+                        if(profile.full_name) displayName = profile.full_name;
+                        // Populate Profile Modal
+                        document.getElementById('profile-name-display').innerText = displayName;
+                        if(profile.avatar_url) {
+                            document.querySelector('.profile-img-large').innerHTML = `<img src="${profile.avatar_url}">`;
+                        } else {
+                            document.getElementById('avatar-initials').innerText = displayName.charAt(0).toUpperCase();
+                        }
+                    } else if (user.user_metadata.full_name) {
+                        displayName = user.user_metadata.full_name;
+                        document.getElementById('profile-name-display').innerText = displayName;
+                        document.getElementById('avatar-initials').innerText = displayName.charAt(0).toUpperCase();
+                    }
+                } catch (error) { console.log(error); }
 
-    // Pre-fill hidden forms
-    if(document.getElementById('hidden-name')) {
-        document.getElementById('hidden-name').value = user.user_metadata.full_name || "Student";
-        document.getElementById('hidden-email').value = user.email;
-    }
-    
-    // Load Data
-    updateAttemptedVisuals();
-    loadLeaderboard();
-    loadNotifications();
-};
+                profileBtn.innerText = `Hi, ${displayName}`;
+            }
 
-    // --- SOUND & PROTECTION SYSTEM (ADDED) ---
-    // 1. Click Sound Logic (Base64 encoded short 'pop' sound to avoid external lag)
-    const clickSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU..."); 
-    // Note: The string above is a placeholder for a real short base64 sound. 
-    // Here is a real, tiny Base64 "pop" sound:
-    const popAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=");
-    
-    // Better Pop Sound (Short Blip)
-    const btnSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+            if(document.getElementById('hidden-name')) {
+                document.getElementById('hidden-name').value = user.user_metadata.full_name || "Student";
+                document.getElementById('hidden-email').value = user.email;
+            }
+            
+            updateAttemptedVisuals();
+            loadLeaderboard();
+            loadNotifications();
+        };
 
-    function playClick() {
-        // Reset time to allow rapid clicking
-        btnSound.currentTime = 0;
-        btnSound.play().catch(e => { /* Ignore auto-play errors */ });
-    }
+        // Attach sound to clickable elements
+        document.addEventListener('click', function(e) {
+            if(e.target.closest('button') || 
+               e.target.closest('.glass-card') || 
+               e.target.closest('.chapter-item') || 
+               e.target.closest('.notif-btn') || 
+               e.target.closest('.close-sidebar')) {
+                playClick();
+            }
+        });
 
-    // Attach sound to all clickable elements
-    document.addEventListener('click', function(e) {
-        if(e.target.closest('button') || 
-           e.target.closest('.glass-card') || 
-           e.target.closest('.chapter-item') || 
-           e.target.closest('.notif-btn') || 
-           e.target.closest('.close-sidebar')) {
-            playClick();
-        }
-    });
-
-    // 2. Disable Content Copying (Right Click & Keyboard Shortcuts)
-    document.addEventListener('contextmenu', event => event.preventDefault()); // Block Right Click
-
-    document.addEventListener('keydown', function(e) {
-        // Block Ctrl+C, Ctrl+U (View Source), Ctrl+S (Save), Ctrl+P (Print)
-        if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's' || e.key === 'p')) {
-            e.preventDefault();
-        }
-        // Block F12 (Dev Tools) - Optional, but requested for protection
-        if(e.key === 'F12') {
-            e.preventDefault();
-        }
-    });
+        // Disable Content Copying
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's' || e.key === 'p')) e.preventDefault();
+            if(e.key === 'F12') e.preventDefault();
+        });
 
     </script>
 </body>
