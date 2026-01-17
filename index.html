@@ -53,7 +53,7 @@
         .user-badge { display: none; font-size: 14px; font-weight: bold; color: #00ff88; border: 1px solid #00ff88; padding: 5px 12px; border-radius: 20px; background: rgba(0, 255, 136, 0.1); text-transform: capitalize; cursor: pointer; font-family: 'Outfit', sans-serif; }
         
         /* SIDEBAR */
-        .sidebar { position: fixed; top: 0; right: -320px; width: 280px; height: 100vh; background: rgba(13, 14, 20, 0.95); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.1); transition: 0.4s; z-index: 1000; padding: 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+        .sidebar { position: fixed; top: 0; right: -320px; width: 280px; height: 100vh; background: rgba(13, 14, 20, 0.95); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.1); transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000; padding: 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
         .sidebar.active { right: 0; } .close-sidebar { text-align: right; cursor: pointer; color: #aaa; margin-bottom: 20px; }
         .notif-item { padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--neon-blue); }
         .notif-item h4 { margin: 0 0 5px 0; font-size: 14px; } .notif-item p { margin: 0; font-size: 12px; color: #bbb; }
@@ -168,8 +168,8 @@
         </div>
     </div>
 
-    <div id="login-modal" class="modal-overlay">
-        <div class="modal-box">
+    <div id="login-modal" class="modal-overlay" onclick="handleOutsideClick(event, 'login-modal')">
+        <div class="modal-box" onclick="event.stopPropagation()">
             <span onclick="document.getElementById('login-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
             <h2>Student Login</h2>
             <div id="step-1">
@@ -185,8 +185,8 @@
         </div>
     </div>
 
-    <div id="share-modal" class="modal-overlay">
-        <div class="modal-box">
+    <div id="share-modal" class="modal-overlay" onclick="handleOutsideClick(event, 'share-modal')">
+        <div class="modal-box" onclick="event.stopPropagation()">
             <div style="font-size:40px; margin-bottom:10px;">🔒</div>
             <h2 style="color:var(--neon-blue);">Unlock Premium Mocks</h2>
             <p style="color:#ccc; font-size:14px; margin-bottom:20px;">Tests take effort to create. Help us grow by sharing with 5 friends.</p>
@@ -198,8 +198,8 @@
         </div>
     </div>
 
-    <div id="share-error-modal" class="modal-overlay">
-        <div class="modal-box">
+    <div id="share-error-modal" class="modal-overlay" onclick="handleOutsideClick(event, 'share-error-modal')">
+        <div class="modal-box" onclick="event.stopPropagation()">
             <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
             <h2 style="color:var(--wrong-red);">Sharing Failed</h2>
             <p style="color:#ccc; font-size:14px; margin-bottom:20px;">It looks like you returned too quickly. Please share on WhatsApp to unlock.</p>
@@ -208,8 +208,8 @@
         </div>
     </div>
 
-    <div id="about-modal" class="modal-overlay">
-        <div class="modal-box" style="max-width:400px; max-height:80vh; overflow-y:auto;">
+    <div id="about-modal" class="modal-overlay" onclick="handleOutsideClick(event, 'about-modal')">
+        <div class="modal-box" style="max-width:400px; max-height:80vh; overflow-y:auto;" onclick="event.stopPropagation()">
             <span onclick="document.getElementById('about-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
             <span style="font-size:12px; color:#aaa; font-weight:bold;">DEVELOPER</span>
             <img src="image.jpg" style="width:80px; height:80px; border-radius:50%; border:2px solid var(--neon-blue); margin:10px auto; display:block;">
@@ -243,9 +243,8 @@
         let shareStartTime = 0; 
         
         // --- SOUND LOGIC (FIXED) ---
-        // Reads the 'soundEnabled' setting directly from localStorage every click
         // MP3 Base64 for maximum compatibility
-        const btnSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+        const btnSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
 
         function playClick() { 
             // Re-read storage in case it changed in another tab/page
@@ -256,6 +255,34 @@
                 sound.volume = 0.5; // Ensure volume is audible
                 sound.play().catch(e => { /* Ignore interaction requirements */ });
             } 
+        }
+
+        // --- SIDEBAR SWIPE LOGIC ---
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const sidebar = document.getElementById('sidebar');
+
+        // Capture Start of Touch
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: false});
+
+        // Capture End of Touch
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: false});
+        
+        // Handle Swipe
+        function handleSwipe() {
+            // Swipe Right to Open (If start near left edge)
+            if (touchStartX < 50 && touchEndX > touchStartX + 50) {
+                toggleSidebar(); // Open
+            }
+            // Swipe Left to Close (If sidebar is open)
+            if (sidebar.classList.contains('active') && touchStartX > touchEndX + 50) {
+                toggleSidebar(); // Close
+            }
         }
 
         // --- SUBJECT LOADING LOGIC ---
@@ -316,6 +343,13 @@
         }
         
         function openAbout() { playClick(); document.getElementById('about-modal').style.display='flex'; }
+        
+        // Function to close modal when clicking outside
+        function handleOutsideClick(event, modalId) {
+            if(event.target.id === modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+        }
 
         // --- AUTH ---
         function openLogin() { playClick(); document.getElementById('login-modal').style.display='flex'; }
@@ -469,8 +503,24 @@
 
         function toggleSidebar() { 
             playClick();
-            document.getElementById('sidebar').classList.toggle('active'); 
+            const sb = document.getElementById('sidebar');
+            sb.classList.toggle('active');
             document.querySelector('.red-dot').style.display = 'none'; 
+            
+            // Close if clicking outside logic handled via general click listener or specific overlay
+            if(sb.classList.contains('active')) {
+                // Add temporary listener to close when clicking outside
+                document.addEventListener('click', closeSidebarOutside);
+            }
+        }
+
+        function closeSidebarOutside(e) {
+            const sb = document.getElementById('sidebar');
+            const btn = document.querySelector('.notif-btn');
+            if (!sb.contains(e.target) && !btn.contains(e.target)) {
+                sb.classList.remove('active');
+                document.removeEventListener('click', closeSidebarOutside);
+            }
         }
 
         function openShareModal() { playClick(); document.getElementById('share-modal').style.display = 'flex'; }
