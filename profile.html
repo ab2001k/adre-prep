@@ -6,89 +6,38 @@
     <title>My Profile | ADRE Prep</title>
     <link rel="icon" href="favicon.ico" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
-        /* --- THEME --- */
-        :root {
-            --bg-dark: #090a0f;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-            --neon-blue: #00f2ff;
-            --text-color: #ffffff;
-            --wrong-red: #ff4b4b;
-            --correct-green: #00ff88;
-            --gold: #ffd700;
-        }
-
-        body {
-            margin: 0; font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%);
-            color: var(--text-color); min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 20px; box-sizing: border-box;
-            -webkit-user-select: none; user-select: none;
-        }
-
-        /* --- LAYOUT --- */
+        :root { --bg-dark: #090a0f; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: 1px solid rgba(255, 255, 255, 0.1); --neon-blue: #00f2ff; --text-color: #ffffff; --wrong-red: #ff4b4b; --correct-green: #00ff88; --gold: #ffd700; }
+        body { margin: 0; font-family: 'Outfit', sans-serif; background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
         .container { width: 100%; max-width: 500px; margin-bottom: 60px; }
         
         .header-row { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .back-btn { text-decoration: none; color: #aaa; font-size: 14px; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; transition: 0.3s; }
-        .back-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: white; }
-
-        /* --- CARDS --- */
-        .glass-card {
-            background: var(--glass-bg); backdrop-filter: blur(12px);
-            border: var(--glass-border); border-radius: 20px;
-            padding: 25px; margin-bottom: 20px; position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden;
-        }
-
-        /* --- PROFILE SECTION --- */
-        .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .back-btn { text-decoration: none; color: #aaa; font-size: 14px; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; }
         
-        /* Avatar Styles - Fixed Size & Fit */
-        .avatar-container {
-            width: 80px; height: 80px; position: relative; cursor: pointer; flex-shrink: 0;
-        }
-        .avatar-circle {
-            width: 100%; height: 100%; background: linear-gradient(135deg, var(--neon-blue), #0055ff);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 32px; border: 3px solid rgba(255,255,255,0.2);
-            overflow: hidden; 
-        }
-        /* Ensure image fills the circle perfectly */
-        .avatar-circle img { 
-            width: 100%; height: 100%; object-fit: cover; display: block; 
-        }
-        .avatar-edit-icon {
-            position: absolute; bottom: 0; right: 0; background: #000; color: #fff;
-            border-radius: 50%; width: 26px; height: 26px; font-size: 13px;
-            display: flex; align-items: center; justify-content: center; border: 1px solid #555;
-        }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
+        
+        /* Avatar */
+        .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .avatar-container { width: 80px; height: 80px; position: relative; cursor: pointer; flex-shrink: 0; }
+        .avatar-circle { width: 100%; height: 100%; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 2px solid var(--neon-blue); overflow: hidden; }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .camera-icon { position: absolute; bottom: 0; right: 0; background: #000; color: #fff; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1px solid #555; }
+        
+        .user-info h2 { margin: 0; font-size: 20px; color: white; }
+        .user-info p { margin: 5px 0 0; font-size: 12px; color: #aaa; }
+        .edit-btn { background: none; border: none; color: var(--neon-blue); cursor: pointer; margin-left: 5px; }
 
-        .user-info h2 { margin: 0; font-size: 22px; color: white; text-transform: capitalize; }
-        .user-info p { margin: 5px 0 0; font-size: 13px; color: #aaa; }
-        .edit-btn { background: none; border: none; color: var(--neon-blue); cursor: pointer; font-size: 14px; margin-left: 5px; }
-
-        /* --- PROGRESS BAR --- */
-        .level-badge { font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 5px; display: block; }
-        .progress-track { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .progress-fill {
-            height: 100%; width: 0%; 
-            background: linear-gradient(90deg, var(--neon-blue), var(--correct-green));
-            border-radius: 10px; transition: width 1s ease-in-out;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
+        /* Progress */
+        .level-badge { font-size: 12px; color: var(--gold); font-weight: bold; display: block; margin-bottom: 5px; }
+        .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--neon-blue), var(--correct-green)); width: 0%; transition: width 1s ease; }
         .stats-row { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #ccc; }
 
-        /* --- TOGGLE --- */
+        /* Toggles */
         .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .setting-row:last-child { margin-bottom: 0; }
         .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 34px; }
@@ -96,262 +45,151 @@
         input:checked + .slider { background-color: var(--correct-green); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* --- CONTRIBUTE BOX --- */
-        .contribute-box { text-align: center; border: 1px dashed var(--neon-blue); background: rgba(0, 242, 255, 0.05); }
-        .contribute-btn {
-            display: inline-block; margin-top: 10px; padding: 10px 20px;
-            background: var(--neon-blue); color: #000; text-decoration: none;
-            border-radius: 20px; font-weight: bold; font-size: 14px;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); transition: 0.3s;
-        }
-        .contribute-btn:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(0, 242, 255, 0.6); }
-
-        /* --- SOCIAL SHARE --- */
-        .social-row { display: flex; justify-content: center; gap: 25px; margin-top: 15px; }
-        .social-icon { 
-            font-size: 24px; text-decoration: none; transition: 0.3s; color: #fff;
-            background: rgba(255,255,255,0.1); width: 50px; height: 50px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        }
-        .social-icon:hover { transform: scale(1.1); background: var(--neon-blue); color: #000; }
-        .fa-whatsapp { color: #25D366; } .social-icon:hover .fa-whatsapp { color: #000; }
-        .fa-facebook-f { color: #1877F2; } .social-icon:hover .fa-facebook-f { color: #000; }
-        .fa-x-twitter { color: #fff; } .social-icon:hover .fa-x-twitter { color: #000; }
-
-        /* --- VISION BOARD --- */
-        .vision-card { text-align: center; overflow: hidden; padding: 0; border: 1px solid rgba(255,255,255,0.1); }
-        .vision-img { width: 100%; height: 180px; object-fit: cover; display: block; opacity: 0.8; mask-image: linear-gradient(to bottom, black 50%, transparent 100%); }
-        .vision-content { padding: 20px; position: relative; top: -40px; }
-        .dev-badge { background: #000; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 5px 12px; border-radius: 15px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- FOOTER --- */
-        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
-        .heart { color: var(--wrong-red); animation: beat 1s infinite; display: inline-block; }
-        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-
-        .logout-btn { width: 100%; padding: 12px; background: rgba(255, 75, 75, 0.1); color: var(--wrong-red); border: 1px solid var(--wrong-red); border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .logout-btn:hover { background: rgba(255, 75, 75, 0.2); }
-
+        .logout-btn { width: 100%; padding: 12px; background: rgba(255, 75, 75, 0.1); color: var(--wrong-red); border: 1px solid var(--wrong-red); border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+        /* Socials */
+        .social-row { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+        .social-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 18px; transition: 0.3s; }
+        .social-btn:hover { background: var(--neon-blue); color: #000; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div class="container">
-        
         <div class="header-row">
-            <a href="index.html" class="back-btn" onclick="playClick()">← Back to Home</a>
-            <span style="font-size:12px; color:#666;">PROFILE</span>
+            <a href="index.html" class="back-btn" onclick="playClick()">← Back</a>
+            <span style="font-size:12px; color:#666;">SETTINGS</span>
         </div>
 
         <div class="glass-card">
             <div class="profile-header">
-                <div class="avatar-container" onclick="document.getElementById('avatar-upload').click()">
-                    <div class="avatar-circle" id="avatar-display">
-                        🧑‍🎓
-                    </div>
-                    <div class="avatar-edit-icon"><i class="fa-solid fa-camera"></i></div>
+                <div class="avatar-container" onclick="document.getElementById('file-upload').click()">
+                    <div class="avatar-circle" id="avatar-display">👤</div>
+                    <div class="camera-icon"><i class="fa-solid fa-camera"></i></div>
                 </div>
-                <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
-
+                <input type="file" id="file-upload" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
+                
                 <div class="user-info">
-                    <h2 id="p-name">Loading... <button class="edit-btn" onclick="editName()"><i class="fa-solid fa-pen"></i></button></h2>
-                    <p id="p-email">...</p>
+                    <h2 id="u-name">Student <button class="edit-btn" onclick="editName()"><i class="fa-solid fa-pen"></i></button></h2>
+                    <p id="u-email">...</p>
                 </div>
             </div>
-
-            <span class="level-badge" id="level-text">LEVEL 1 • NOVICE</span>
-            <div class="progress-track">
-                <div class="progress-fill" id="progress-bar"></div>
-            </div>
+            
+            <span class="level-badge" id="lvl-txt">LEVEL 1</span>
+            <div class="progress-track"><div class="progress-fill" id="prog-bar"></div></div>
             <div class="stats-row">
-                <span>Score: <b style="color:white;" id="score-val">0</b> pts</span>
-                <span id="next-level">Next Level: 100</span>
+                <span>Score: <b style="color:var(--neon-blue);" id="u-score">0</b></span>
+                <span id="next-lvl">Next: 100</span>
             </div>
         </div>
 
-        <div class="glass-card" style="padding: 15px 25px;">
+        <div class="glass-card">
             <div class="setting-row">
-                <span style="font-size:14px;"><i class="fa-solid fa-earth-americas" style="color:var(--neon-blue); width:20px;"></i> Public Profile</span>
-                <label class="switch">
-                    <input type="checkbox" id="privacy-toggle" onchange="togglePrivacy(this)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            
-            <div class="setting-row">
-                <span style="font-size:14px;"><i class="fa-solid fa-volume-high" style="color:var(--correct-green); width:20px;"></i> Sound Effects</span>
+                <span><i class="fa-solid fa-volume-high" style="color:var(--correct-green); width:25px;"></i> Sound Effects</span>
                 <label class="switch">
                     <input type="checkbox" id="sound-toggle" onchange="toggleSound(this)">
                     <span class="slider"></span>
                 </label>
             </div>
-        </div>
-
-        <div class="glass-card contribute-box">
-            <h3 style="margin:0 0 10px 0; color:var(--neon-blue);">🤝 Join the Mission</h3>
-            <p style="font-size:13px; color:#ccc; line-height:1.5;">
-                We are building this for free to help every student. Do you want to contribute questions, notes, or help manage?
-            </p>
-            <a href="#" onclick="openContributionMail()" class="contribute-btn">📩 Send Request to Join</a>
-        </div>
-
-        <div class="glass-card" style="text-align: center;">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:#aaa;">Share with Friends</h4>
-            <div class="social-row">
-                <a href="https://wa.me/?text=Check%20out%20this%20free%20ADRE%20Prep%20App!%20https://ab2001k.github.io/adre-prep/" target="_blank" class="social-icon"><i class="fa-brands fa-whatsapp"></i></a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=https://ab2001k.github.io/adre-prep/" target="_blank" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="https://twitter.com/intent/tweet?text=Free%20ADRE%20Mock%20Test%20App&url=https://ab2001k.github.io/adre-prep/" target="_blank" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
+            <div class="setting-row">
+                <span><i class="fa-solid fa-earth-americas" style="color:var(--neon-blue); width:25px;"></i> Public Profile</span>
+                <label class="switch">
+                    <input type="checkbox" id="privacy-toggle" onchange="togglePrivacy(this)">
+                    <span class="slider"></span>
+                </label>
             </div>
         </div>
 
-        <div class="glass-card vision-card">
-            <img src="image.jpg" alt="Vision" class="vision-img">
-            <div class="vision-content">
-                <span class="dev-badge">Founder's Vision</span>
-                <h3 style="margin: 10px 0; font-size: 18px;">Education for All</h3>
-                <p style="font-size: 13px; color: #ccc; font-style: italic;">
-                    "I started this project with zero budget but 100% passion. The goal is simple: Technology should bridge the gap between effort and success, not money."
-                </p>
-                <div style="margin-top:10px; font-weight:bold; color:var(--neon-blue);">- Abhik Dutta</div>
+        <div class="glass-card" style="text-align:center;">
+            <h4 style="margin:0 0 15px 0; color:#aaa;">Share App</h4>
+            <div class="social-row">
+                <a href="https://wa.me/?text=Try ADRE Prep: https://ab2001k.github.io/adre-prep/" target="_blank" class="social-btn" style="color:#25D366;"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#" class="social-btn" style="color:#1877F2;"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="social-btn"><i class="fa-brands fa-x-twitter"></i></a>
             </div>
         </div>
 
         <button onclick="logout()" class="logout-btn">Log Out</button>
-
-        <div class="footer">
-            Made with <span class="heart">❤️</span> in Assam
-        </div>
-
+        <div class="footer">Made with ❤️ in Assam</div>
     </div>
 
     <script>
         // CONFIG
         const SUPABASE_URL = 'https://blltdzrfgryijzoastmt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_H0S0tAon1YanWFgKTWoilA_wMKZRZ5j'; 
-        const ADMIN_EMAIL = "abhikdutta639@gmail.com";
-
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
         let currentUser = null;
+
+        // SOUND
         let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+        const clickSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
 
-        // --- VALID SOUNDS ---
-        const popSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
-        const clickSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+        function playClick() { if(soundEnabled) { clickSound.currentTime=0; clickSound.play().catch(()=>{}); } }
+        function toggleSound(el) { soundEnabled = el.checked; localStorage.setItem('soundEnabled', soundEnabled); if(soundEnabled) playClick(); }
 
-        function playClick() {
-            if(!soundEnabled) return;
-            clickSound.currentTime = 0;
-            clickSound.play().catch(e => {});
-        }
-
-        function toggleSound(el) {
-            soundEnabled = el.checked;
-            localStorage.setItem('soundEnabled', soundEnabled);
-            if(soundEnabled) playClick();
-        }
-
-        // --- LOAD DATA ---
-        async function init() {
-            // Apply Sound Settings to UI
+        // INIT
+        window.onload = async function() {
             document.getElementById('sound-toggle').checked = soundEnabled;
-
             const { data: { user } } = await _supabase.auth.getUser();
-            if (!user) { window.location.href = 'index.html'; return; }
+            if(!user) { window.location.href = 'index.html'; return; }
             currentUser = user;
 
-            // Fetch Profile
             const { data: profile } = await _supabase.from('profiles').select('*').eq('id', user.id).single();
-            
-            const name = profile?.full_name || user.user_metadata.full_name || "Student";
+            const name = profile?.full_name || "Student";
             const score = profile?.total_score || 0;
-            const isPublic = profile?.is_public ?? true;
-            const avatarUrl = profile?.avatar_url;
+            
+            document.getElementById('u-name').innerHTML = `${name} <button class="edit-btn" onclick="editName()"><i class="fa-solid fa-pen"></i></button>`;
+            document.getElementById('u-email').innerText = user.email;
+            document.getElementById('u-score').innerText = score;
+            document.getElementById('privacy-toggle').checked = profile?.is_public ?? true;
 
-            // UI Updates
-            document.getElementById('p-name').innerHTML = `${name} <button class="edit-btn" onclick="editName()"><i class="fa-solid fa-pen"></i></button>`;
-            document.getElementById('p-email').innerText = user.email;
-            document.getElementById('score-val').innerText = score;
-            document.getElementById('privacy-toggle').checked = isPublic;
-
-            // Avatar Update (Force Cache Bust with Timestamp)
-            if(avatarUrl) {
-                document.getElementById('avatar-display').innerHTML = `<img src="${avatarUrl}?t=${new Date().getTime()}" alt="Avatar">`;
+            if(profile?.avatar_url) {
+                document.getElementById('avatar-display').innerHTML = `<img src="${profile.avatar_url}?t=${Date.now()}">`;
             } else {
-                let initials = name.charAt(0).toUpperCase();
-                document.getElementById('avatar-display').innerText = initials;
+                document.getElementById('avatar-display').innerText = name.charAt(0).toUpperCase();
             }
 
-            // Progress Logic
-            const level = Math.floor(score / 100) + 1;
-            const progress = score % 100;
-            const titles = ["Novice", "Learner", "Achiever", "Scholar", "Master", "Legend"];
-            const title = titles[Math.min(level - 1, titles.length - 1)];
+            // Level Calc
+            let lvl = Math.floor(score/100) + 1;
+            document.getElementById('lvl-txt').innerText = `LEVEL ${lvl}`;
+            document.getElementById('prog-bar').style.width = `${score % 100}%`;
+            document.getElementById('next-lvl').innerText = `Next: ${lvl*100}`;
+        };
 
-            document.getElementById('level-text').innerText = `LEVEL ${level} • ${title.toUpperCase()}`;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            document.getElementById('next-level').innerText = `Next Level: ${level * 100}`;
-        }
-
-        // --- AVATAR UPLOAD ---
-        async function handleAvatarUpload(event) {
+        // UPLOAD
+        async function uploadAvatar(e) {
             playClick();
-            const file = event.target.files[0];
-            if(!file || !currentUser) return;
+            const file = e.target.files[0];
+            if(!file) return;
+            if(file.size > 2000000) { alert("File Max 2MB"); return; }
 
-            // Validation
-            if (file.size > 2000000) { alert("File too big! Max 2MB."); return; }
-
-            // Loading State
-            document.getElementById('avatar-display').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; 
-
-            // File Path: user_id.ext
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUser.id}.${fileExt}`;
-            const filePath = `${fileName}`;
-
-            // 1. Upload to Supabase (Overwrite existing)
-            const { error: uploadError } = await _supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
+            document.getElementById('avatar-display').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+            const fileName = `${currentUser.id}.${file.name.split('.').pop()}`;
             
-            if (uploadError) {
-                alert("Upload failed. Ensure you ran the SQL query to make the 'avatars' bucket PUBLIC.");
-                console.error(uploadError);
-                init(); // Revert UI
-                return;
-            }
+            const { error } = await _supabase.storage.from('avatars').upload(fileName, file, { upsert: true });
+            if(error) { alert("Upload Failed. Check bucket permissions."); location.reload(); return; }
 
-            // 2. Get Public URL
-            const { data } = _supabase.storage.from('avatars').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            // 3. Update Database
-            await _supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
+            const { data } = _supabase.storage.from('avatars').getPublicUrl(fileName);
+            await _supabase.from('profiles').update({ avatar_url: data.publicUrl }).eq('id', currentUser.id);
             
-            // 4. Force UI Refresh
-            setTimeout(init, 500); 
-        }
-
-        // --- ACTIONS ---
-        async function editName() {
-            playClick();
-            let oldName = document.getElementById('p-name').innerText.trim();
-            let newName = prompt("Enter Name:", oldName);
-            if(newName && newName !== oldName) {
-                await _supabase.from('profiles').upsert({ id: currentUser.id, full_name: newName });
-                init(); 
-            }
+            document.getElementById('avatar-display').innerHTML = `<img src="${data.publicUrl}?t=${Date.now()}">`;
         }
 
         async function togglePrivacy(el) {
             playClick();
-            await _supabase.from('profiles').update({ is_public: el.checked }).eq('id', currentUser.id);
+            const { error } = await _supabase.from('profiles').update({ is_public: el.checked }).eq('id', currentUser.id);
+            if(error) { el.checked = !el.checked; alert("Update failed."); }
         }
 
-        function openContributionMail() {
+        async function editName() {
             playClick();
-            const subject = "I want to Join ADRE Prep Team";
-            const body = `Hi Abhik,\n\nI love what you are doing! I want to contribute for free.\n\nMy Name: [Name]\nMy Skill/Area of Help: (e.g. Making Questions, PDF Notes, Tech Support)\n\nLet's connect!`;
-            window.location.href = `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            let newName = prompt("Enter Name:");
+            if(newName) {
+                await _supabase.from('profiles').upsert({ id: currentUser.id, full_name: newName });
+                location.reload();
+            }
         }
 
         async function logout() {
@@ -359,15 +197,6 @@
             await _supabase.auth.signOut();
             window.location.href = 'index.html';
         }
-
-        window.onload = init;
-
-        // --- CONTENT PROTECTION ---
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's' || e.key === 'p')) e.preventDefault();
-            if(e.key === 'F12') e.preventDefault();
-        });
     </script>
 </body>
 </html>
