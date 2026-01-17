@@ -30,6 +30,7 @@
     
     <style>
         /* --- GLOBAL STYLES --- */
+        * { -webkit-tap-highlight-color: transparent; }
         :root { --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: 1px solid rgba(255, 255, 255, 0.1); --neon-blue: #00f2ff; --text-color: #ffffff; --wrong-red: #ff4b4b; --correct-green: #00ff88; }
         
         body { 
@@ -242,13 +243,18 @@
         let shareStartTime = 0; 
         
         // --- SOUND LOGIC (FIXED) ---
-        const btnSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+        // Reads the 'soundEnabled' setting directly from localStorage every click
+        // MP3 Base64 for maximum compatibility
+        const btnSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
 
         function playClick() { 
+            // Re-read storage in case it changed in another tab/page
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             if(isSoundOn) { 
-                btnSound.currentTime = 0; 
-                btnSound.play().catch(()=>{}); 
+                // Clone node allows rapid firing of the sound
+                const sound = btnSound.cloneNode();
+                sound.volume = 0.5; // Ensure volume is audible
+                sound.play().catch(e => { /* Ignore interaction requirements */ });
             } 
         }
 
@@ -472,9 +478,8 @@
         function shareOnWhatsApp() {
             playClick();
             document.getElementById('share-error-modal').style.display = 'none';
-         const message = "Hey! 😊 I found this amazing FREE Mock Test app for ADRE 3.0 📝✨ Practicing here really helps to boost confidence and score 📈🔥 Check it out 👉 https://ab2001k.github.io/adre-prep/";
-const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-
+            const message = "Hey! I found this amazing free Mock Test app for ADRE 3.0. Practicing here helps a lot! Check it out: https://ab2001k.github.io/adre-prep/";
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
             
             shareStartTime = Date.now(); 
             window.open(url, '_blank');
