@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADRE 3.0 Pro</title>
+    
     <link rel="icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png" />
+    
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
@@ -17,8 +22,10 @@
           safari_web_id: "web.onesignal.auto.662c778c-4ab6-4517-8ad0-9e9a32a53670",
           notifyButton: { enable: false },
         });
+        if (Notification.permission === "denied") document.getElementById('perm-warning').style.display = 'block';
       });
     </script>
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
@@ -29,7 +36,7 @@
             margin: 0; font-family: 'Outfit', sans-serif; 
             background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%); 
             color: var(--text-color); min-height: 100vh; overflow-x: hidden;
-            -webkit-user-select: none; user-select: none;
+            -webkit-user-select: none; user-select: none; /* Anti-Copy */
         }
 
         #perm-warning { display: none; background: rgba(255, 75, 75, 0.15); backdrop-filter: blur(10px); color: #ff4b4b; text-align: center; padding: 10px; font-size: 13px; border-bottom: 1px solid rgba(255, 75, 75, 0.3); position: sticky; top: 0; z-index: 1001; }
@@ -78,14 +85,10 @@
         .lb-item:hover { background: rgba(255,255,255,0.03); }
         .lb-left-grp { display: flex; align-items: center; gap: 15px; flex: 1; }
         .lb-rank { width: 25px; font-weight: bold; color: #666; font-size: 14px; text-align: center; }
-        
-        /* Leaderboard Avatar */
-        .lb-avatar { width: 32px; height: 32px; background: linear-gradient(135deg, #333, #555); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #fff; border: 1px solid rgba(255,255,255,0.1); object-fit: cover; overflow: hidden; }
-        .lb-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        
-        .lb-name { text-align: left; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+        .lb-avatar { width: 32px; height: 32px; background: linear-gradient(135deg, #333, #555); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #fff; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .lb-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .lb-name { text-align: left; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; margin-left: 10px; }
         .lb-score { font-weight: bold; color: #00ff88; font-size: 14px; }
-        
         .rank-1 .lb-rank { content: "🥇"; font-size: 20px; text-indent: -1000px; position: relative; } 
         .rank-1 .lb-rank::after { content: "🥇"; position: absolute; top: -5px; left: 0; text-indent: 0; } 
         .rank-1 { background: rgba(255, 215, 0, 0.1); border-left: 3px solid #ffd700; }
@@ -105,7 +108,7 @@
         .input-field { width: 90%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #222; color: white; margin-bottom: 12px; font-family: 'Outfit', sans-serif; }
         .submit-btn { background: var(--neon-blue); color: #000; border: none; width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* DEV & FEEDBACK */
+        /* DEV & FEEDBACK STYLES */
         .dev-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-blue); margin-bottom: 10px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
         .dev-role { color: #aaa; font-size: 12px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; display: block;}
         .dev-bio { font-size: 13px; color: #ddd; line-height: 1.6; margin: 10px 0; font-style: italic; }
@@ -196,13 +199,16 @@
     <div id="about-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:400px; max-height:80vh; overflow-y:auto;">
             <span onclick="document.getElementById('about-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
+            
             <span class="dev-role">Developer</span>
             <img src="image.jpg" alt="Dev" class="dev-avatar">
             <h3 style="margin: 5px 0; color: white;">Abhik Dutta</h3>
             <span style="color: #aaa; font-size: 12px;">B.Voc in IT</span>
             <p class="dev-bio">"Hi, I built ADRE 3.0 Prep to make education free and accessible for all. Best of luck!"</p>
             <a href="mailto:Abhikdutta639@gmail.com" class="dev-contact">📧 Abhikdutta639@gmail.com</a>
+            
             <hr style="border:1px solid #333; margin:15px 0;">
+
             <h3 style="margin-top:0; font-size:16px;">💡 Suggestions?</h3>
             <form id="feedback-form" action="https://formspree.io/f/xeeqqanb" method="POST" onsubmit="handleFeedback(event)">
                 <input type="hidden" name="name" id="hidden-name">
@@ -219,6 +225,7 @@
             <div style="font-size:40px; margin-bottom:10px;">🔒</div>
             <h2 style="color:var(--neon-blue);">Unlock Premium Mocks</h2>
             <p style="color:#ccc; font-size:14px; margin-bottom:20px;">Tests take effort to create. Help us grow by sharing with 5 friends.</p>
+            
             <button onclick="shareOnWhatsApp()" class="submit-btn" style="background:#25D366; color:white; display:flex; align-items:center; justify-content:center; gap:10px;">
                 <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i>
                 <span>Share on WhatsApp</span>
@@ -258,18 +265,16 @@
         let currentUser = null; 
         let tempEmail = ""; 
         let shareStartTime = 0; 
-        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
-
-        // --- 1. SOUND SYSTEM ---
-        const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); // Short blip
         
+        // Sound Check
+        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+        const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
+
         function playClick() {
-            if(!soundEnabled) return;
-            btnSound.currentTime = 0;
-            btnSound.play().catch(e => {}); 
+            if(soundEnabled) { btnSound.currentTime=0; btnSound.play().catch(()=>{}); }
         }
 
-        // --- 2. DYNAMIC SUBJECT LOADER ---
+        // --- 1. DYNAMIC SUBJECT LOADER ---
         async function openSubject(subjectName) { 
             document.getElementById('home-page').style.display = 'none';
             document.getElementById('subject-page').style.display = 'block';
@@ -298,7 +303,9 @@
                         const type = cols[3];
 
                         if(rowSubject === subjectName) {
-                            let isLocked = (type !== 'PDF' && count > 0 && !isUnlocked);
+                            let isLocked = false;
+                            if (type !== 'PDF' && count > 0 && !isUnlocked) isLocked = true;
+
                             if(type === 'PDF') {
                                 html += `<li class="chapter-item" onclick="window.open('${value}', '_blank')"><span>${btnName}</span><span class="lock-indicator">📄</span></li>`;
                             } else {
@@ -323,7 +330,7 @@
             }
         }
 
-       // --- 3. REFERRAL & ABOUT LOGIC ---
+       // --- 2. REFERRAL & ABOUT LOGIC ---
         function openAbout() { document.getElementById('about-modal').style.display='flex'; }
         function openShareModal() { document.getElementById('share-modal').style.display = 'flex'; }
 
@@ -358,7 +365,7 @@
             }
         }
 
-        // --- 4. AUTHENTICATION & PROFILE ---
+        // --- 3. AUTHENTICATION ---
         async function sendOtp() {
             const name = document.getElementById('name-input').value;
             const email = document.getElementById('email-input').value;
@@ -389,7 +396,7 @@
             }
         }
 
-        // --- 5. UTILITIES ---
+        // --- 4. UTILITIES ---
         function getStorageKey() { return currentUser ? "attempts_" + currentUser.id : "attempts_guest"; }
         
         function attemptOpen(url, req) {
@@ -418,16 +425,16 @@
         function loadLeaderboard() {
             const list = document.getElementById('leaderboard-list');
             if(!list) return;
-            // Fetch users, ensure they are public
-            _supabase.from('profiles')
-                .select('full_name, total_score, avatar_url')
+            // FILTER: is_public = true (Handles the Profile Toggle)
+            _supabase.from('profiles').select('full_name, total_score, avatar_url')
+                .eq('is_public', true)
                 .order('total_score', { ascending: false })
                 .limit(50)
                 .then(({ data, error }) => {
                     list.innerHTML = "";
                     if(error) {
                         console.error("Leaderboard Error:", error);
-                        list.innerHTML = '<p style="text-align:center; color:red;">Leaderboard unavailable. (Check DB Policies)</p>';
+                        list.innerHTML = '<p style="text-align:center; color:#666;">Check connection.</p>';
                         return;
                     }
                     if(!data || data.length === 0) {
@@ -439,7 +446,8 @@
                             // Avatar Logic
                             let avatarHtml = "";
                             if(user.avatar_url) {
-                                avatarHtml = `<img src="${user.avatar_url}" alt="A">`;
+                                // Add timestamp to force refresh if image changed
+                                avatarHtml = `<img src="${user.avatar_url}?t=${new Date().getTime()}" alt="A">`;
                             } else {
                                 let initials = user.full_name ? user.full_name.charAt(0).toUpperCase() : "?";
                                 avatarHtml = initials;
@@ -489,7 +497,7 @@
             } catch(e) {}
         }
 
-        // --- 6. PWA INSTALL ---
+        // --- 5. PWA INSTALL LOGIC ---
         if ('serviceWorker' in navigator) {
             const link = document.createElement('link'); link.rel = 'manifest'; link.href = 'manifest.json'; document.head.appendChild(link);
             navigator.serviceWorker.register('sw.js');
