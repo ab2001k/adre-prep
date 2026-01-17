@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ADRE 3.0 Mock Test</title>
+    <link rel="icon" href="https://fav.farm/📝" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* --- CORE THEME --- */
+        :root {
+            --bg-dark: #090a0f;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --neon-blue: #00f2ff;
+            --correct-green: #00ff88;
+            --wrong-red: #ff4b4b;
+            --mark-yellow: #ffcc00;
+            --text-main: #ffffff;
+            --text-sub: #aaaaaa;
+        }
+
+        body {
+            margin: 0; font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%);
+            color: var(--text-main); height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+            
+            /* --- CONTENT PROTECTION CSS --- */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
+            -webkit-touch-callout: none; /* iOS Safari - prevents menu on long press */
+        }
+
+        /* --- 1. HEADER --- */
+        .quiz-header {
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1); height: 50px; flex-shrink: 0; z-index: 10;
+        }
+        .home-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff;
+            padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .home-btn:active { background: rgba(255,255,255,0.1); transform: scale(0.95); }
+        
+        .timer-box {
+            font-family: monospace; font-size: 16px; font-weight: bold;
+            color: var(--neon-blue); border: 1px solid var(--neon-blue);
+            padding: 4px 10px; border-radius: 5px; background: rgba(0, 242, 255, 0.1);
+        }
+        .timer-box.warning { color: var(--wrong-red); border-color: var(--wrong-red); background: rgba(255, 75, 75, 0.1); }
+
+        /* --- 2. PALETTE STRIPE (SCROLLABLE) --- */
+        .palette-stripe {
+            display: flex; overflow-x: auto; gap: 8px; padding: 10px 15px;
+            background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0; scrollbar-width: none; /* Hide scrollbar Firefox */
+        }
+        .palette-stripe::-webkit-scrollbar { display: none; /* Hide scrollbar Chrome */ }
+        
+        .p-btn {
+            width: 40px; height: 40px; flex-shrink: 0; border-radius: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #ccc; font-size: 13px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; transition: 0.2s;
+        }
+        .p-btn.active { border: 2px solid #fff; background: rgba(255,255,255,0.15); color: #fff; transform: scale(1.05); box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+        .p-btn.attempted { background: var(--correct-green); color: #000; border-color: var(--correct-green); }
+        .p-btn.skipped { background: var(--wrong-red); color: #fff; border-color: var(--wrong-red); }
+        
+        /* Star indicator inside palette button */
+        .star-icon { font-size: 10px; position: absolute; top: 1px; right: 2px; display: none; color: black; }
+        .p-btn.marked .star-icon { display: block; }
+        .p-btn.marked { background: var(--mark-yellow); color: black; border-color: var(--mark-yellow); }
+
+        /* --- 3. QUESTION AREA --- */
+        .content-area {
+            flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; /* Space for footer */
+            max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box;
+            /* Smooth Scroll */
+            scroll-behavior: smooth;
+        }
+        
+        .q-card {
+            background: var(--glass-bg); border: var(--glass-border);
+            border-radius: 15px; padding: 20px; position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .q-meta { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; }
+        .q-badge { background: var(--neon-blue); color: #000; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        .report-link { color: var(--wrong-red); font-size: 11px; cursor: pointer; text-decoration: underline; opacity: 0.7; }
+
+        .q-text { font-size: 17px; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
+
+        /* Options */
+        .opt-btn {
+            width: 100%; text-align: left; padding: 15px; margin-bottom: 12px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; color: #ddd; font-size: 15px; cursor: pointer;
+            transition: 0.2s; position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .opt-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.08); }
+        .opt-btn.selected { background: rgba(0, 242, 255, 0.15); border-color: var(--neon-blue); color: #fff; box-shadow: 0 0 10px rgba(0, 242, 255, 0.1); }
+        
+        /* Review Mode Colors */
+        .opt-btn.correct { background: rgba(0, 255, 136, 0.2); border-color: var(--correct-green); }
+        .opt-btn.wrong { background: rgba(255, 75, 75, 0.2); border-color: var(--wrong-red); }
+
+        /* --- 4. FOOTER CONTROLS (Sticky) --- */
+        .footer-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background: #0d0e14; border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 15px; box-sizing: border-box; z-index: 20;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+        }
+        
+        .f-btn {
+            padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 14px;
+            border: none; cursor: pointer; display: flex; align-items: center; gap: 5px;
+            transition: 0.2s;
+        }
+        .f-btn:active { transform: scale(0.95); }
+        
+        .btn-prev { background: rgba(255,255,255,0.1); color: #ccc; }
+        .btn-mark { background: transparent; border: 1px solid var(--mark-yellow); color: var(--mark-yellow); padding: 10px 15px;}
+        .btn-next { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        .btn-submit { background: var(--correct-green); color: #000; width: 100px; display: none; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); justify-content: center; }
+
+        /* --- MODALS --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-box {
+            background: #1a1f2e; width: 90%; max-width: 340px; padding: 25px;
+            border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        /* Allow selection in input area so user can edit report */
+        .input-area { 
+            width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid #444; color: #fff; padding: 10px; margin-top: 10px; border-radius: 5px; 
+            -webkit-user-select: text; user-select: text; font-family: inherit;
+        }
+        
+        /* REPORT CARD STYLE */
+        .student-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.05);
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: #ddd;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .score-circle {
+            width: 120px; height: 120px; border-radius: 50%; border: 6px solid #333;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            margin: 0 auto 20px; font-size: 32px; font-weight: bold;
+            background: rgba(0,0,0,0.3);
+            transition: border-color 1s ease;
+        }
+
+        .motivational-text { font-size: 14px; color: var(--neon-blue); font-style: italic; margin-bottom: 20px; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="quiz-header">
+        <button class="home-btn" onclick="attemptExit()">🏠 Exit</button>
+        <span style="font-size:14px; color:#ccc; font-weight:500;" id="test-subject-display">Mock Test</span>
+        <div class="timer-box" id="timer">00:00</div>
+    </div>
+
+    <div class="palette-stripe" id="palette-container">
+        </div>
+
+    <div class="content-area">
+        <div class="q-card" id="question-card">
+            <p style="text-align:center; color:#888;">Loading your test...</p>
+        </div>
+    </div>
+
+    <div class="footer-bar">
+        <div style="display:flex; gap:10px;">
+            <button class="f-btn btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>←</button>
+            <button class="f-btn btn-mark" onclick="markReview()">★</button>
+        </div>
+        
+        <button class="f-btn btn-next" id="btn-next" onclick="nextQuestion()">Next →</button>
+        <button class="f-btn btn-submit" id="btn-submit" onclick="submitTest()">Submit</button>
+    </div>
+
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal-box">
+            <h2 style="color:#fff; margin:0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">Report Card</h2>
+            <div class="student-badge" id="studentNameDisplay">Candidate: Loading...</div>
+            
+            <div class="score-circle" id="scoreDisplay">
+                <span id="scoreVal">0%</span>
+                <span style="font-size:11px; color:#aaa; font-weight:normal;">ACCURACY</span>
+            </div>
+            
+            <p id="resultMsg" style="color:#ccc; font-size:15px; margin-bottom:5px;">...</p>
+            <p class="motivational-text" id="motivationMsg">Keep Grinding! 🔥</p>
+            
+            <button class="f-btn" style="background:var(--neon-blue); color:#000; width:100%; margin-bottom:10px; justify-content:center;" onclick="reviewAnswers()">Check Solutions 📝</button>
+            <button class="f-btn" style="background:transparent; border:1px solid #555; color:#aaa; width:100%; justify-content:center;" onclick="exitSafely()">Back to Home</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal-box">
+            <h3 style="color:var(--wrong-red); margin-top:0;">🚩 Report Issue</h3>
+            <p style="font-size:12px; color:#aaa;">Found a mistake in this question?</p>
+            <textarea id="report-text" class="input-area" placeholder="Describe the error (e.g. Option B is correct)..."></textarea>
+            <div style="display:flex; gap:10px; margin-top:15px; justify-content:center;">
+                <button class="f-btn" style="background:transparent; border:1px solid #555; color:#ccc;" onclick="document.getElementById('reportModal').style.display='none'">Cancel</button>
+                <button class="f-btn" style="background:var(--wrong-red); color:#fff;" onclick="sendReport()">Send Report</button>
+            </div>
+        </div>
+    </div>
+
+    <form name="question-report" netlify hidden>
+        <input type="text" name="student_name" />
+        <input type="text" name="test_id" />
+        <input type="text" name="question_number" />
+        <input type="text" name="issue_description" />
+        <input type="text" name="browser_info" />
+    </form>
+
+    <script>
+        // --- SOUND SYSTEM (Base64 for Performance) ---
+        // Soft Click/Tap Sound
+        const tapSound = new Audio("data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
+        // Real Base64 "Blip"
+        const blip = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+        
+        // Success Chime (Short)
+        const chime = new Audio("data:audio/mp3;base64,//uQZAAAAAAAABAAAAAAAAAAAAAA=="); // Placeholder for length, using generic beep logic below if fails, but trying to keep it light.
+        // Actually, let's just use the blip for interactions to keep it pro and fast.
+        
+        function playSound(type) {
+            // Reset to allow rapid firing
+            blip.currentTime = 0;
+            // Lower volume for subtle effect
+            blip.volume = 0.3; 
+            blip.play().catch(e => {});
+        }
+
+        // --- CONFIG ---
+        const QUESTION_BANK_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=408771765&single=true&output=csv'; 
+        const SECONDS_PER_QUESTION = 60;
+        
+        // GLOBAL VARS
+        let questions = [], currentQIndex = 0, userAnswers = {}, qStatus = {}, timeRemaining = 0, timerInterval;
+        let isReviewMode = false, isSubmitted = false;
+        let studentName = "Future Officer"; // Default Name
+
+        // URL PARAMS
+        const urlParams = new URLSearchParams(window.location.search);
+        const testID = urlParams.get('id');
+        const subjectName = urlParams.get('subject') || "Test";
+        document.getElementById('test-subject-display').innerText = subjectName;
+
+        // SUPABASE
+        const SUPABASE_URL = 'https://blltdzrfgryijzoastmt.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_H0S0tAon1YanWFgKTWoilA_wMKZRZ5j'; 
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        let currentUser = null;
+
+        // --- EXIT PROTECTION ---
+        window.onbeforeunload = function() {
+            if (!isSubmitted) {
+                return "You have not submitted the test. Are you sure you want to leave?";
+            }
+        };
+
+        function attemptExit() {
+            if(!isSubmitted) {
+                if(confirm("⚠️ Warning: Your progress will be lost if you exit now.\n\nAre you sure?")) {
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function exitSafely() {
+            isSubmitted = true; // Ensure logic knows we are safe
+            window.location.href = 'index.html';
+        }
+
+        // --- INIT ---
+        window.onload = async function() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            currentUser = user;
+            
+            // Fetch Name from Profile if available
+            if(user) {
+                const { data: profile } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
+                if(profile && profile.full_name) studentName = profile.full_name;
+                else if(user.user_metadata.full_name) studentName = user.user_metadata.full_name;
+            }
+
+            if (!testID) return document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:red;">No Test ID.</p>';
+            await loadQuestions();
+        };
+
+        async function loadQuestions() {
+            try {
+                const response = await fetch(QUESTION_BANK_URL);
+                if (!response.ok) throw new Error("Failed to load");
+                const text = await response.text();
+                parseCSV(text);
+            } catch (e) {
+                document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:red;">Error loading questions. Check connection.</p>';
+            }
+        }
+
+        function parseCSV(csvText) {
+            const rows = csvText.split(/\r?\n/).slice(1);
+            questions = [];
+            rows.forEach(row => {
+                const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(x => x.replace(/^"|"$/g, '').trim());
+                if(c.length >= 7 && c[0] === testID) {
+                    questions.push({ q: c[1], options: [c[2], c[3], c[4], c[5]], correct: parseInt(c[6]) });
+                }
+            });
+            if (questions.length === 0) document.getElementById('question-card').innerHTML = `<p style="text-align:center;">No questions found.</p>`;
+            else initQuiz();
+        }
+
+        function initQuiz() {
+            timeRemaining = questions.length * SECONDS_PER_QUESTION;
+            startTimer();
+            // Build Palette Strip
+            const p = document.getElementById('palette-container');
+            p.innerHTML = '';
+            questions.forEach((_, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'p-btn';
+                btn.innerHTML = `${i + 1} <span class="star-icon">★</span>`; 
+                btn.onclick = () => { playSound(); jumpToQuestion(i); };
+                btn.id = `pal-${i}`;
+                p.appendChild(btn);
+            });
+            // Init State
+            questions.forEach((_, i) => { userAnswers[i] = null; qStatus[i] = 'not-visited'; });
+            loadQuestion(0);
+        }
+
+        function loadQuestion(idx) {
+            currentQIndex = idx;
+            const q = questions[idx];
+            const el = document.getElementById('question-card');
+            
+            let html = `
+                <div class="q-meta">
+                    <span class="q-badge">Q ${idx + 1} / ${questions.length}</span>
+                    <span class="report-link" onclick="document.getElementById('reportModal').style.display='flex'">🚩 Report</span>
+                </div>
+                <div class="q-text">${q.q}</div>
+                <div>`;
+            
+            q.options.forEach((opt, i) => {
+                let cls = 'opt-btn';
+                if(isReviewMode) {
+                    if(i === q.correct) cls += ' correct';
+                    else if(userAnswers[idx] === i) cls += ' wrong';
+                } else {
+                    if(userAnswers[idx] === i) cls += ' selected';
+                }
+                html += `<button class="${cls}" onclick="selectOption(${i})" ${isReviewMode?'disabled':''}>${opt}</button>`;
+            });
+            html += `</div>`;
+            el.innerHTML = html;
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            // Scroll palette to keep active button in view
+            const activeBtn = document.getElementById(`pal-${currentQIndex}`);
+            if(activeBtn) {
+                activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+                activeBtn.classList.add('active');
+            }
+
+            // Update Palette Colors
+            questions.forEach((_, i) => {
+                const btn = document.getElementById(`pal-${i}`);
+                if(qStatus[i] === 'marked') btn.classList.add('marked');
+                else btn.classList.remove('marked');
+                
+                if(userAnswers[i] !== null) btn.classList.add('attempted');
+                else if(qStatus[i] === 'visited') btn.classList.add('skipped');
+            });
+
+            // Buttons Logic
+            document.getElementById('btn-prev').disabled = (currentQIndex === 0);
+            if(currentQIndex === questions.length - 1) {
+                document.getElementById('btn-next').style.display = 'none';
+                document.getElementById('btn-submit').style.display = 'flex';
+            } else {
+                document.getElementById('btn-next').style.display = 'flex';
+                document.getElementById('btn-submit').style.display = 'none';
+            }
+            
+            // Review Mode Overrides
+            if(isReviewMode) {
+                document.getElementById('btn-submit').style.display = 'flex';
+                document.getElementById('btn-submit').innerText = "Finish";
+                document.getElementById('btn-submit').onclick = () => exitSafely();
+                document.getElementById('btn-next').style.display = (currentQIndex === questions.length - 1) ? 'none' : 'flex';
+            }
+        }
+
+        // --- ACTIONS ---
+        function selectOption(i) {
+            playSound();
+            if(isReviewMode) return;
+            userAnswers[currentQIndex] = i;
+            if(qStatus[currentQIndex] === 'marked') qStatus[currentQIndex] = 'visited'; 
+            loadQuestion(currentQIndex);
+        }
+        function nextQuestion() {
+            playSound();
+            if(qStatus[currentQIndex] !== 'marked') qStatus[currentQIndex] = 'visited';
+            if(currentQIndex < questions.length - 1) loadQuestion(currentQIndex + 1);
+        }
+        function prevQuestion() {
+            playSound();
+            if(currentQIndex > 0) loadQuestion(currentQIndex - 1);
+        }
+        function jumpToQuestion(i) {
+            if(qStatus[currentQIndex] !== 'marked') qStatus[currentQIndex] = 'visited';
+            loadQuestion(i);
+        }
+        function markReview() {
+            playSound();
+            if(isReviewMode) return;
+            qStatus[currentQIndex] = (qStatus[currentQIndex] === 'marked') ? 'visited' : 'marked';
+            updateUI();
+        }
+
+        // --- TIMER & SUBMIT ---
+        function startTimer() {
+            const el = document.getElementById('timer');
+            timerInterval = setInterval(() => {
+                let m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+                el.innerText = `${m}:${s<10?'0'+s:s}`;
+                if(timeRemaining < 60) el.classList.add('warning');
+                if(timeRemaining-- <= 0) { clearInterval(timerInterval); submitTest(); }
+            }, 1000);
+        }
+
+        async function submitTest() {
+            if(isReviewMode) return;
+            
+            // Warning if not all attempted? Optional, keeping it simple for now.
+            clearInterval(timerInterval);
+            isSubmitted = true; // Disable exit warning
+            
+            let score = 0;
+            questions.forEach((q, i) => { if(userAnswers[i] === q.correct) score++; });
+            const pct = Math.round((score/questions.length)*100);
+            
+            // Supabase Save
+            const { data: { user } } = await _supabase.auth.getUser();
+            if(user) {
+                const { data: profile } = await _supabase.from('profiles').select('total_score').eq('id', user.id).single();
+                let newTotal = (profile ? profile.total_score : 0) + score;
+                await _supabase.from('profiles').upsert({ id: user.id, total_score: newTotal });
+            }
+
+            // Populate Report Card
+            document.getElementById('studentNameDisplay').innerText = `Candidate: ${studentName}`;
+            document.getElementById('scoreVal').innerText = pct + "%";
+            document.getElementById('resultMsg').innerText = `You scored ${score} out of ${questions.length}`;
+            
+            const circle = document.getElementById('scoreDisplay');
+            const motiv = document.getElementById('motivationMsg');
+            
+            if(pct >= 80) { 
+                circle.style.borderColor = "var(--correct-green)"; 
+                motiv.innerText = "Outstanding! You are exam ready! 🌟";
+                motiv.style.color = "var(--correct-green)";
+            } else if (pct >= 50) {
+                circle.style.borderColor = "var(--mark-yellow)"; 
+                motiv.innerText = "Good effort! Revise the weak areas. 💪";
+                motiv.style.color = "var(--mark-yellow)";
+            } else { 
+                circle.style.borderColor = "var(--wrong-red)"; 
+                motiv.innerText = "Don't give up! Consistency is key. 🔥";
+                motiv.style.color = "var(--wrong-red)";
+            }
+            
+            document.getElementById('resultModal').style.display = 'flex';
+        }
+
+        function reviewAnswers() {
+            isReviewMode = true;
+            document.getElementById('resultModal').style.display = 'none';
+            loadQuestion(0);
+        }
+
+        // --- REPORTING ---
+        function sendReport() {
+            const issue = document.getElementById('report-text').value;
+            if(!issue) return alert("Please type something.");
+            
+            const qData = questions[currentQIndex];
+            
+            const formData = new FormData();
+            formData.append("form-name", "question-report");
+            formData.append("student_name", studentName);
+            formData.append("test_id", testID);
+            formData.append("question_number", `Q${currentQIndex+1}: ${qData.q.substring(0,20)}...`);
+            formData.append("issue_description", issue);
+            
+            fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(formData).toString() })
+            .then(() => { alert("Thanks! We will check this."); document.getElementById('reportModal').style.display='none'; })
+            .catch(() => alert("Error sending report."));
+        }
+
+        // --- CONTENT PROTECTION ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && (e.keyCode == 85 || e.keyCode == 67 || e.keyCode == 83 || (e.shiftKey && e.keyCode == 73))) return false;
+        };
+        document.ondragstart = function() { return false; };
+        
+    </script>
+</body>
+</html>

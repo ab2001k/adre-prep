@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | ADRE Prep</title>
+    <link rel="icon" href="favicon.ico" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+
+<link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* --- THEME --- */
+        :root {
+            --bg-dark: #090a0f;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --neon-blue: #00f2ff;
+            --text-color: #ffffff;
+            --wrong-red: #ff4b4b;
+            --correct-green: #00ff88;
+            --gold: #ffd700;
+        }
+
+        body {
+            margin: 0; font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%);
+            color: var(--text-color); min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px; box-sizing: border-box;
+        }
+
+        /* --- LAYOUT --- */
+        .container { width: 100%; max-width: 500px; margin-bottom: 60px; }
+        
+        .header-row { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-btn { text-decoration: none; color: #aaa; font-size: 14px; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; transition: 0.3s; }
+        .back-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: white; }
+
+        /* --- CARDS --- */
+        .glass-card {
+            background: var(--glass-bg); backdrop-filter: blur(12px);
+            border: var(--glass-border); border-radius: 20px;
+            padding: 25px; margin-bottom: 20px; position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden;
+        }
+
+        /* --- PROFILE SECTION --- */
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .avatar-circle {
+            width: 70px; height: 70px; background: linear-gradient(135deg, var(--neon-blue), #0055ff);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; border: 3px solid rgba(255,255,255,0.2);
+        }
+        .user-info h2 { margin: 0; font-size: 22px; color: white; text-transform: capitalize; }
+        .user-info p { margin: 5px 0 0; font-size: 13px; color: #aaa; }
+        .edit-btn { background: none; border: none; color: var(--neon-blue); cursor: pointer; font-size: 12px; margin-left: 5px; }
+
+        /* --- PROGRESS BAR --- */
+        .level-badge { font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 5px; display: block; }
+        .progress-track { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .progress-fill {
+            height: 100%; width: 0%; 
+            background: linear-gradient(90deg, var(--neon-blue), var(--correct-green));
+            border-radius: 10px; transition: width 1s ease-in-out;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        .stats-row { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #ccc; }
+
+        /* --- TOGGLE --- */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--correct-green); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* --- CONTRIBUTE BOX --- */
+        .contribute-box { text-align: center; border: 1px dashed var(--neon-blue); background: rgba(0, 242, 255, 0.05); }
+        .contribute-btn {
+            display: inline-block; margin-top: 10px; padding: 10px 20px;
+            background: var(--neon-blue); color: #000; text-decoration: none;
+            border-radius: 20px; font-weight: bold; font-size: 14px;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); transition: 0.3s;
+        }
+        .contribute-btn:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(0, 242, 255, 0.6); }
+
+        /* --- SOCIAL SHARE --- */
+        .social-row { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+        .social-icon { font-size: 24px; text-decoration: none; transition: 0.3s; opacity: 0.8; }
+        .social-icon:hover { transform: scale(1.2); opacity: 1; }
+
+        /* --- VISION BOARD --- */
+        .vision-card { text-align: center; overflow: hidden; padding: 0; border: 1px solid rgba(255,255,255,0.1); }
+        .vision-img { width: 100%; height: 180px; object-fit: cover; display: block; opacity: 0.8; mask-image: linear-gradient(to bottom, black 50%, transparent 100%); }
+        .vision-content { padding: 20px; position: relative; top: -40px; }
+        .dev-badge { background: #000; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 5px 12px; border-radius: 15px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- FOOTER --- */
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+        .heart { color: var(--wrong-red); animation: beat 1s infinite; display: inline-block; }
+        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+        .logout-btn { width: 100%; padding: 12px; background: rgba(255, 75, 75, 0.1); color: var(--wrong-red); border: 1px solid var(--wrong-red); border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="header-row">
+            <a href="index.html" class="back-btn">← Back to Home</a>
+            <span style="font-size:12px; color:#666;">PROFILE</span>
+        </div>
+
+        <div class="glass-card">
+            <div class="profile-header">
+                <div class="avatar-circle">🧑‍🎓</div>
+                <div class="user-info">
+                    <h2 id="p-name">Loading... <button class="edit-btn" onclick="editName()">✎</button></h2>
+                    <p id="p-email">...</p>
+                </div>
+            </div>
+
+            <span class="level-badge" id="level-text">LEVEL 1 • NOVICE</span>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+            <div class="stats-row">
+                <span>Score: <b style="color:white;" id="score-val">0</b> pts</span>
+                <span id="next-level">Next Level: 100</span>
+            </div>
+        </div>
+
+        <div class="glass-card" style="padding: 15px 25px;">
+            <div class="setting-row">
+                <span style="font-size:14px;">Show Name on Leaderboard</span>
+                <label class="switch">
+                    <input type="checkbox" id="privacy-toggle" onchange="togglePrivacy()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="glass-card contribute-box">
+            <h3 style="margin:0 0 10px 0; color:var(--neon-blue);">🤝 Join the Mission</h3>
+            <p style="font-size:13px; color:#ccc; line-height:1.5;">
+                We are building this for free to help every student. Do you want to contribute questions, notes, or help manage?
+            </p>
+            <a href="#" onclick="openContributionMail()" class="contribute-btn">📩 Send Request to Join</a>
+        </div>
+
+        <div class="glass-card" style="text-align: center;">
+            <h4 style="margin:0 0 10px 0; font-size:14px; color:#aaa;">Share with Friends</h4>
+            <div class="social-row">
+                <a href="https://wa.me/?text=Check%20out%20this%20free%20ADRE%20Prep%20App!%20https://adre-prep.netlify.app" target="_blank" class="social-icon">💚</a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https://adre-prep.netlify.app" target="_blank" class="social-icon">💙</a>
+                <a href="https://twitter.com/intent/tweet?text=Free%20ADRE%20Mock%20Test%20App&url=https://adre-prep.netlify.app" target="_blank" class="social-icon">🖤</a>
+            </div>
+        </div>
+
+        <div class="glass-card vision-card">
+            <img src="image.jpg" alt="Vision" class="vision-img">
+            <div class="vision-content">
+                <span class="dev-badge">Founder's Vision</span>
+                <h3 style="margin: 10px 0; font-size: 18px;">Education for All</h3>
+                <p style="font-size: 13px; color: #ccc; font-style: italic;">
+                    "I started this project with zero budget but 100% passion. The goal is simple: Technology should bridge the gap between effort and success, not money."
+                </p>
+                <div style="margin-top:10px; font-weight:bold; color:var(--neon-blue);">- Abhik Dutta</div>
+            </div>
+        </div>
+
+        <button onclick="logout()" class="logout-btn">Log Out</button>
+
+        <div class="footer">
+            Made with <span class="heart">❤️</span> in Assam
+        </div>
+
+    </div>
+
+    <script>
+        // CONFIG
+        const SUPABASE_URL = 'https://blltdzrfgryijzoastmt.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_H0S0tAon1YanWFgKTWoilA_wMKZRZ5j'; 
+        const ADMIN_EMAIL = "abhikdutta639@gmail.com";
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        let currentUser = null;
+
+        // LOAD DATA
+        async function init() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+            currentUser = user;
+
+            // Fetch Profile
+            const { data: profile } = await _supabase.from('profiles').select('*').eq('id', user.id).single();
+            
+            const name = profile?.full_name || user.user_metadata.full_name || "Student";
+            const score = profile?.total_score || 0;
+            const isPublic = profile?.is_public ?? true;
+
+            // UI Updates
+            document.getElementById('p-name').innerHTML = `${name} <button class="edit-btn" onclick="editName()">✎</button>`;
+            document.getElementById('p-email').innerText = user.email;
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('privacy-toggle').checked = isPublic;
+
+            // Progress Logic (Level System: 1 Level = 100 Points)
+            const level = Math.floor(score / 100) + 1;
+            const progress = score % 100;
+            const titles = ["Novice", "Learner", "Achiever", "Scholar", "Master", "Legend"];
+            const title = titles[Math.min(level - 1, titles.length - 1)];
+
+            document.getElementById('level-text').innerText = `LEVEL ${level} • ${title.toUpperCase()}`;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('next-level').innerText = `Next Level: ${level * 100}`;
+        }
+
+        // ACTIONS
+        async function editName() {
+            let oldName = document.getElementById('p-name').innerText.replace(' ✎', '');
+            let newName = prompt("Enter Name:", oldName);
+            if(newName && newName !== oldName) {
+                await _supabase.from('profiles').upsert({ id: currentUser.id, full_name: newName });
+                init(); // Reload
+            }
+        }
+
+        async function togglePrivacy() {
+            const val = document.getElementById('privacy-toggle').checked;
+            await _supabase.from('profiles').update({ is_public: val }).eq('id', currentUser.id);
+        }
+
+        function openContributionMail() {
+            const subject = "I want to Join ADRE Prep Team";
+            const body = `Hi Abhik,\n\nI love what you are doing! I want to contribute for free.\n\nMy Name: [Name]\nMy Skill/Area of Help: (e.g. Making Questions, PDF Notes, Tech Support)\n\nLet's connect!`;
+            window.location.href = `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        async function logout() {
+            await _supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
