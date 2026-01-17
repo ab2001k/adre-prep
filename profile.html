@@ -9,8 +9,8 @@
     <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png" />
     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
@@ -61,7 +61,7 @@
         
         /* Avatar Styles */
         .avatar-container {
-            width: 70px; height: 70px; position: relative; cursor: pointer;
+            width: 70px; height: 70px; position: relative; cursor: pointer; flex-shrink: 0;
         }
         .avatar-circle {
             width: 100%; height: 100%; background: linear-gradient(135deg, var(--neon-blue), #0055ff);
@@ -78,7 +78,7 @@
 
         .user-info h2 { margin: 0; font-size: 22px; color: white; text-transform: capitalize; }
         .user-info p { margin: 5px 0 0; font-size: 13px; color: #aaa; }
-        .edit-btn { background: none; border: none; color: var(--neon-blue); cursor: pointer; font-size: 12px; margin-left: 5px; }
+        .edit-btn { background: none; border: none; color: var(--neon-blue); cursor: pointer; font-size: 14px; margin-left: 5px; }
 
         /* --- PROGRESS BAR --- */
         .level-badge { font-size: 12px; color: var(--gold); font-weight: bold; margin-bottom: 5px; display: block; }
@@ -114,13 +114,13 @@
         /* --- SOCIAL SHARE --- */
         .social-row { display: flex; justify-content: center; gap: 25px; margin-top: 15px; }
         .social-icon { 
-            font-size: 28px; text-decoration: none; transition: 0.3s; color: #fff;
+            font-size: 24px; text-decoration: none; transition: 0.3s; color: #fff;
             background: rgba(255,255,255,0.1); width: 50px; height: 50px; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
         }
         .social-icon:hover { transform: scale(1.1); background: var(--neon-blue); color: #000; }
         .fa-whatsapp { color: #25D366; } .social-icon:hover .fa-whatsapp { color: #000; }
-        .fa-facebook { color: #1877F2; } .social-icon:hover .fa-facebook { color: #000; }
+        .fa-facebook-f { color: #1877F2; } .social-icon:hover .fa-facebook-f { color: #000; }
         .fa-x-twitter { color: #fff; } .social-icon:hover .fa-x-twitter { color: #000; }
 
         /* --- VISION BOARD --- */
@@ -151,7 +151,9 @@
         <div class="glass-card">
             <div class="profile-header">
                 <div class="avatar-container" onclick="document.getElementById('avatar-upload').click()">
-                    <div class="avatar-circle" id="avatar-display">🧑‍🎓</div>
+                    <div class="avatar-circle" id="avatar-display">
+                        🧑‍🎓
+                    </div>
                     <div class="avatar-edit-icon"><i class="fa-solid fa-camera"></i></div>
                 </div>
                 <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
@@ -238,15 +240,18 @@
         let currentUser = null;
         let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
 
-        // --- SOUND LOGIC ---
-        // Valid Base64 "Pop" Sound
-        const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
-        const realPop = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
-
+        // --- VALID SOUND (POP) ---
+        // Short, crisp pop sound (Base64)
+        const popSound = new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAACAAAAA//8AAP//AAAAAA=="); 
+        // Note: The previous string was too long/complex. This is a very short blip. 
+        // If you want the satisfying pop, ensure "soundEnabled" is handled correctly.
+        
         function playClick() {
             if(!soundEnabled) return;
-            realPop.currentTime = 0;
-            realPop.play().catch(e => {});
+            // Create new instance to allow overlapping sounds
+            const sound = popSound.cloneNode(); 
+            sound.volume = 0.3;
+            sound.play().catch(e => {});
         }
 
         function toggleSound(checkbox) {
@@ -280,7 +285,8 @@
 
             // Avatar Update
             if(avatarUrl) {
-                document.getElementById('avatar-display').innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
+                // Add timestamp to force refresh if image changed
+                document.getElementById('avatar-display').innerHTML = `<img src="${avatarUrl}?t=${new Date().getTime()}" alt="Avatar">`;
             } else {
                 let initials = name.charAt(0).toUpperCase();
                 document.getElementById('avatar-display').innerText = initials;
@@ -303,21 +309,24 @@
             const file = event.target.files[0];
             if(!file || !currentUser) return;
 
-            // Simple validation
+            // Validation
             if (file.size > 2000000) { alert("File too big! Max 2MB."); return; }
 
-            document.getElementById('avatar-display').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; // Loading
+            // UI Feedback
+            const display = document.getElementById('avatar-display');
+            display.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; 
 
             const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUser.id}-${Math.random()}.${fileExt}`;
+            const fileName = `${currentUser.id}.${fileExt}`; // Overwrite existing
             const filePath = `${fileName}`;
 
-            // 1. Upload to Supabase 'avatars' bucket
-            const { error: uploadError } = await _supabase.storage.from('avatars').upload(filePath, file);
+            // 1. Upload to Supabase
+            const { error: uploadError } = await _supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
+            
             if (uploadError) {
-                alert("Upload failed. Make sure 'avatars' bucket exists and is Public.");
+                alert("Upload failed. Please create 'avatars' bucket in Supabase Storage and make it Public.");
                 console.error(uploadError);
-                init(); // Reset UI
+                init(); // Revert UI
                 return;
             }
 
@@ -328,8 +337,8 @@
             // 3. Update Database
             await _supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
             
-            alert("Profile Picture Updated! 📸");
-            init(); // Refresh UI
+            // 4. Refresh UI
+            setTimeout(init, 500); // Small delay to allow propagation
         }
 
         // --- ACTIONS ---
@@ -339,7 +348,7 @@
             let newName = prompt("Enter Name:", oldName);
             if(newName && newName !== oldName) {
                 await _supabase.from('profiles').upsert({ id: currentUser.id, full_name: newName });
-                init(); // Reload
+                init(); 
             }
         }
 
