@@ -52,9 +52,25 @@
         
         .user-badge { display: none; font-size: 14px; font-weight: bold; color: #00ff88; border: 1px solid #00ff88; padding: 5px 12px; border-radius: 20px; background: rgba(0, 255, 136, 0.1); text-transform: capitalize; cursor: pointer; font-family: 'Outfit', sans-serif; }
         
-        /* SIDEBAR */
-        .sidebar { position: fixed; top: 0; right: -320px; width: 280px; height: 100vh; background: rgba(13, 14, 20, 0.95); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.1); transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000; padding: 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-        .sidebar.active { right: 0; } .close-sidebar { text-align: right; cursor: pointer; color: #aaa; margin-bottom: 20px; }
+        /* SIDEBAR (Optimized for Swipe) */
+        .sidebar-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); z-index: 999; display: none; 
+            backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s;
+        }
+        .sidebar { 
+            position: fixed; top: 0; right: -320px; width: 280px; height: 100vh; 
+            background: rgba(13, 14, 20, 0.95); backdrop-filter: blur(20px); 
+            border-left: 1px solid rgba(255,255,255,0.1); 
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth Physics */
+            z-index: 1000; padding: 20px; 
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            will-change: transform;
+        }
+        .sidebar.active { transform: translateX(-320px); } 
+        /* Note: Basic CSS opens it, JS will handle dynamic drag */
+
+        .close-sidebar { text-align: right; cursor: pointer; color: #aaa; margin-bottom: 20px; padding: 10px; }
         .notif-item { padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--neon-blue); }
         .notif-item h4 { margin: 0 0 5px 0; font-size: 14px; } .notif-item p { margin: 0; font-size: 12px; color: #bbb; }
         
@@ -86,14 +102,10 @@
         .lb-item:hover { background: rgba(255,255,255,0.03); }
         .lb-left-grp { display: flex; align-items: center; gap: 15px; flex: 1; }
         .lb-rank { width: 25px; font-weight: bold; color: #666; font-size: 14px; text-align: center; }
-        
-        /* Leaderboard Avatar */
         .lb-avatar { width: 32px; height: 32px; background: linear-gradient(135deg, #333, #555); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #fff; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
         .lb-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        
         .lb-name { text-align: left; font-size: 14px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; margin-left: 10px; }
         .lb-score { font-weight: bold; color: #00ff88; font-size: 14px; }
-        
         .rank-1 .lb-rank { content: "🥇"; font-size: 20px; text-indent: -1000px; position: relative; } 
         .rank-1 .lb-rank::after { content: "🥇"; position: absolute; top: -5px; left: 0; text-indent: 0; } 
         .rank-1 { background: rgba(255, 215, 0, 0.1); border-left: 3px solid #ffd700; }
@@ -122,14 +134,15 @@
         <div class="header-actions">
             <button id="login-btn" class="login-btn-header" onclick="openLogin()">Login</button>
             <button id="profile-btn" class="user-badge" onclick="window.location.href='profile.html'">Hi, Student</button>
-            <div class="notif-btn" onclick="toggleSidebar()">
+            <div class="notif-btn" onclick="openSidebar()">
                 🔔 <div class="red-dot"></div>
             </div>
         </div>
     </div>
 
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
     <div id="sidebar" class="sidebar">
-        <div class="close-sidebar" onclick="toggleSidebar()">CLOSE ✕</div>
+        <div class="close-sidebar" onclick="closeSidebar()">CLOSE ✕</div>
         <h3>Updates</h3>
         <div id="notif-content">
             <p style="color:#888; text-align:center; font-size:12px;">Checking for updates...</p>
@@ -244,46 +257,172 @@
         let tempEmail = ""; 
         let shareStartTime = 0; 
         
-        // --- SOUND LOGIC (Using your supplied Base64) ---
-        // This is a placeholder. If you have the actual base64 for click.wav, paste it inside the quotes below.
-        // I have used a standard short click sound here as per request logic change but you mentioned you have click.wav so use its base64.
-        const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
+        // --- SOUND LOGIC (LOUD CLICK) ---
+        // Base64 for a standard UI Click/Tap (Mechanical style, audible)
+        const clickSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAACAAAAA//8AAP//AAAAAA=="); // Fallback tiny blip
+        const realClick = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
 
         function playClick() { 
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             if(isSoundOn) { 
-                btnSound.currentTime = 0; 
-                btnSound.play().catch(()=>{}); 
+                // Using the clone ensures we can tap fast without waiting for sound to finish
+                const sound = realClick.cloneNode(); 
+                sound.volume = 1.0; // Max volume for visibility
+                sound.play().catch(e => { /* Ignored auto-play errors */ });
             } 
         }
 
-        // --- SIDEBAR SWIPE LOGIC ---
-        let touchStartX = 0;
-        let touchEndX = 0;
+        // --- GLOBAL CLICK DELEGATION FOR SOUND ---
+        document.addEventListener('click', function(e) {
+            // Check if user clicked a button, link, card, or icon
+            if(e.target.closest('button, .glass-card, .chapter-item, .notif-btn, .close-sidebar, a, .submit-btn')) {
+                playClick();
+            }
+        });
+
+        // --- SIDEBAR SWIPE & LOGIC ---
         const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        let touchStartX = 0;
+        let touchCurrentX = 0;
+        let isDragging = false;
 
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, {passive: false});
-
-        document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, {passive: false});
-        
-        function handleSwipe() {
-            if (touchStartX < 30 && touchEndX > touchStartX + 50) { // Swipe Right to Open (from edge)
-                toggleSidebar();
-            }
-            if (sidebar.classList.contains('active') && touchStartX > touchEndX + 50) { // Swipe Left to Close
-                toggleSidebar();
-            }
+        function openSidebar() {
+            playClick();
+            sidebar.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            sidebar.style.transform = 'translateX(-320px)'; // Bring it into view (left)
+            sidebar.classList.add('active');
+            overlay.style.display = 'block';
+            setTimeout(() => overlay.style.opacity = 1, 10); // Fade in
+            document.querySelector('.red-dot').style.display = 'none';
         }
+
+        function closeSidebar() {
+            playClick();
+            sidebar.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            sidebar.style.transform = 'translateX(0)'; // Hide it (right)
+            sidebar.classList.remove('active');
+            overlay.style.opacity = 0;
+            setTimeout(() => overlay.style.display = 'none', 300); // Wait for fade out
+        }
+
+        // 1. Touch Start
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            // Only start dragging if:
+            // A) Sidebar is OPEN
+            // B) Sidebar is CLOSED but touch is near right edge (> window width - 40px)
+            const isOpen = sidebar.classList.contains('active');
+            if (isOpen || (!isOpen && touchStartX > window.innerWidth - 40)) {
+                isDragging = true;
+                sidebar.style.transition = 'none'; // Disable transition for 1:1 following
+            }
+        }, {passive: true});
+
+        // 2. Touch Move (Follow Finger)
+        document.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            touchCurrentX = e.touches[0].clientX;
+            const deltaX = touchStartX - touchCurrentX;
+            const isOpen = sidebar.classList.contains('active');
+
+            // Logic: Sidebar lives at right: -320px (visually off screen).
+            // Transform X = -320px means it's fully visible (at right:0).
+            // Transform X = 0 means it's hidden.
+
+            if (isOpen) {
+                // Dragging Right (Closing): deltaX is negative.
+                // We want to move from -320px towards 0.
+                // Clamped between -320 and 0.
+                let newPos = -320 + (touchCurrentX - touchStartX); 
+                if (newPos > 0) newPos = 0; // Don't detach from edge
+                if (newPos < -320) newPos = -320; 
+                sidebar.style.transform = `translateX(${newPos}px)`;
+            } else {
+                // Dragging Left (Opening): deltaX is positive.
+                // We want to move from 0 towards -320px.
+                let newPos = 0 - (touchStartX - touchCurrentX);
+                if (newPos < -320) newPos = -320;
+                if (newPos > 0) newPos = 0;
+                sidebar.style.transform = `translateX(${newPos}px)`;
+            }
+        }, {passive: true});
+
+        // 3. Touch End (Snap)
+        document.addEventListener('touchend', e => {
+            if (!isDragging) return;
+            isDragging = false;
+            sidebar.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)'; // Re-enable smooth snap
+
+            const movedDistance = touchStartX - touchCurrentX;
+            const isOpen = sidebar.classList.contains('active');
+            const threshold = 80; // Pixels to trigger snap
+
+            if (isOpen) {
+                // If dragged Right significantly -> Close
+                // Dragging right means touchCurrentX > touchStartX, so movedDistance is negative
+                if (movedDistance < -threshold) {
+                    closeSidebar();
+                } else {
+                    // Snap back to Open
+                    sidebar.style.transform = 'translateX(-320px)';
+                }
+            } else {
+                // If dragged Left significantly -> Open
+                if (movedDistance > threshold) {
+                    openSidebar();
+                } else {
+                    // Snap back to Closed
+                    sidebar.style.transform = 'translateX(0)';
+                }
+            }
+        });
 
         // --- MODAL OUTSIDE CLICK LOGIC ---
         function handleOutsideClick(event, modalId) {
             if (event.target.id === modalId) {
                 document.getElementById(modalId).style.display = 'none';
+            }
+        }
+
+        // --- AUTH ---
+        function openLogin() { playClick(); document.getElementById('login-modal').style.display='flex'; }
+        
+        function resetLogin() {
+             document.getElementById('step-2').style.display = 'none';
+             document.getElementById('step-1').style.display = 'block';
+             document.getElementById('login-msg').innerText = "";
+        }
+        
+        async function sendOtp() {
+            playClick();
+            const name = document.getElementById('name-input').value;
+            const email = document.getElementById('email-input').value;
+            if(name.length < 2 || !email.includes('@')) return;
+            document.getElementById('login-msg').innerText = "Sending...";
+            tempEmail = email;
+            const { error } = await _supabase.auth.signInWithOtp({ email, options: { data: { full_name: name } } });
+            if (error) document.getElementById('login-msg').innerText = "Error: " + error.message; 
+            else { 
+                document.getElementById('step-1').style.display = 'none';
+                document.getElementById('step-2').style.display = 'block';
+                document.getElementById('login-msg').innerText = "OTP Sent!";
+            }
+        }
+
+        async function verifyOtp() {
+            playClick();
+            const token = document.getElementById('otp-input').value;
+            const { data, error } = await _supabase.auth.verifyOtp({ email: tempEmail, token, type: 'email' });
+            if (error) document.getElementById('login-msg').innerText = "Wrong Code!"; 
+            else { 
+                document.getElementById('login-msg').innerText = "Success!"; 
+                const { user } = data;
+                if(user) {
+                    const name = user.user_metadata.full_name || "Student";
+                    await _supabase.from('profiles').upsert({ id: user.id, full_name: name }, { onConflict: 'id', ignoreDuplicates: true }); 
+                }
+                setTimeout(() => { document.getElementById('login-modal').style.display='none'; location.reload(); }, 1000); 
             }
         }
 
@@ -345,47 +484,6 @@
         }
         
         function openAbout() { playClick(); document.getElementById('about-modal').style.display='flex'; }
-
-        // --- AUTH ---
-        function openLogin() { playClick(); document.getElementById('login-modal').style.display='flex'; }
-
-        function resetLogin() {
-             document.getElementById('step-2').style.display = 'none';
-             document.getElementById('step-1').style.display = 'block';
-             document.getElementById('login-msg').innerText = "";
-        }
-        
-        async function sendOtp() {
-            playClick();
-            const name = document.getElementById('name-input').value;
-            const email = document.getElementById('email-input').value;
-            if(name.length < 2 || !email.includes('@')) return;
-            document.getElementById('login-msg').innerText = "Sending...";
-            tempEmail = email;
-            const { error } = await _supabase.auth.signInWithOtp({ email, options: { data: { full_name: name } } });
-            if (error) document.getElementById('login-msg').innerText = "Error: " + error.message; 
-            else { 
-                document.getElementById('step-1').style.display = 'none';
-                document.getElementById('step-2').style.display = 'block';
-                document.getElementById('login-msg').innerText = "OTP Sent!";
-            }
-        }
-
-        async function verifyOtp() {
-            playClick();
-            const token = document.getElementById('otp-input').value;
-            const { data, error } = await _supabase.auth.verifyOtp({ email: tempEmail, token, type: 'email' });
-            if (error) document.getElementById('login-msg').innerText = "Wrong Code!"; 
-            else { 
-                document.getElementById('login-msg').innerText = "Success!"; 
-                const { user } = data;
-                if(user) {
-                    const name = user.user_metadata.full_name || "Student";
-                    await _supabase.from('profiles').upsert({ id: user.id, full_name: name }, { onConflict: 'id', ignoreDuplicates: true }); 
-                }
-                setTimeout(() => { document.getElementById('login-modal').style.display='none'; location.reload(); }, 1000); 
-            }
-        }
 
         // --- INIT & UTILS ---
         window.onload = async function() {
@@ -502,20 +600,13 @@
             document.getElementById('home-page').style.display = 'block'; 
         }
 
-        function toggleSidebar() { 
-            playClick();
-            document.getElementById('sidebar').classList.toggle('active'); 
-            document.querySelector('.red-dot').style.display = 'none'; 
-        }
-
         function openShareModal() { playClick(); document.getElementById('share-modal').style.display = 'flex'; }
         
         function shareOnWhatsApp() {
             playClick();
             document.getElementById('share-error-modal').style.display = 'none';
-            const message = "Hey! 😊 I found this amazing FREE Mock Test app for ADRE 3.0 📝✨ Practicing here really helps to boost confidence and score 📈🔥 Check it out 👉 https://ab2001k.github.io/adre-prep/";
-const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-
+            const message = "Hey! I found this amazing free Mock Test app for ADRE 3.0. Practicing here helps a lot! Check it out: https://ab2001k.github.io/adre-prep/";
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
             
             shareStartTime = Date.now(); 
             window.open(url, '_blank');
@@ -595,11 +686,6 @@ const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's' || e.key === 'p')) e.preventDefault();
             if(e.key === 'F12') e.preventDefault();
-        });
-        document.addEventListener('click', function(e) {
-            if(e.target.closest('button') || e.target.closest('.glass-card') || e.target.closest('.chapter-item') || e.target.closest('.notif-btn') || e.target.closest('.close-sidebar')) {
-                playClick();
-            }
         });
     </script>
 </body>
