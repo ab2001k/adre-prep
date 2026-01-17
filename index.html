@@ -241,11 +241,13 @@
         let tempEmail = ""; 
         let shareStartTime = 0; 
         
-        // --- SOUND LOGIC ---
+        // --- SOUND LOGIC (FIXED) ---
         // Reads the 'soundEnabled' setting directly from localStorage every click
-        const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
+        // MP3 Base64 for maximum compatibility
+        const btnSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
 
         function playClick() { 
+            // Re-read storage in case it changed in another tab/page
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             if(isSoundOn) { 
                 btnSound.currentTime = 0; 
@@ -425,7 +427,8 @@
                 .then(({ data, error }) => {
                     list.innerHTML = "";
                     if(error) {
-                        list.innerHTML = '<p style="text-align:center; color:#666;">Leaderboard Loading...</p>';
+                        console.error("Leaderboard Error:", error);
+                        list.innerHTML = '<p style="text-align:center; color:#666;">Check connection.</p>';
                         return;
                     }
                     if(!data || data.length === 0) {
@@ -472,9 +475,8 @@
         function shareOnWhatsApp() {
             playClick();
             document.getElementById('share-error-modal').style.display = 'none';
-           const message = "Hey! 😊 I found this amazing FREE Mock Test app for ADRE 3.0 📝✨ Practicing here really helps to boost confidence and score 📈🔥 Check it out 👉 https://ab2001k.github.io/adre-prep/";
-const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-
+            const message = "Hey! I found this amazing free Mock Test app for ADRE 3.0. Practicing here helps a lot! Check it out: https://ab2001k.github.io/adre-prep/";
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
             
             shareStartTime = Date.now(); 
             window.open(url, '_blank');
