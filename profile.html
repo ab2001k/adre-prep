@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
-        /* [STYLES REMAIN SAME AS PREVIOUS CORRECT VERSION] */
+        /* --- GLOBAL FIX: REMOVE BLUE TAP HIGHLIGHT --- */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* --- THEME --- */
         :root { --bg-dark: #090a0f; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: 1px solid rgba(255, 255, 255, 0.1); --neon-blue: #00f2ff; --text-color: #ffffff; --wrong-red: #ff4b4b; --correct-green: #00ff88; --gold: #ffd700; }
         body { margin: 0; font-family: 'Outfit', sans-serif; background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
         .container { width: 100%; max-width: 500px; margin-bottom: 60px; }
@@ -119,12 +122,7 @@
         <div class="glass-card" style="text-align: center;">
             <h4 style="margin:0 0 10px 0; font-size:14px; color:#aaa;">Share with Friends</h4>
             <div class="social-row">
-                <a href="https://wa.me/?text=%F0%9F%9A%80%20*FREE%20ADRE%203.0%20Prep%20App!*%20%F0%9F%93%9A%E2%9C%85%0A%0APractice%20mock%20tests%20%E2%9C%8D%F0%9F%8F%BB%20%7C%20Boost%20confidence%20%F0%9F%92%AA%F0%9F%8F%BB%20%7C%20Improve%20score%20%F0%9F%93%88%F0%9F%94%A5%0A%0A%F0%9F%91%89%20Check%20it%20now%3A%20https%3A%2F%2Fab2001k.github.io%2Fadre-prep%2F"
-   target="_blank"
-   class="social-icon">
-   <i class="fa-brands fa-whatsapp"></i>
-</a>
-
+                <a href="https://wa.me/?text=Check%20out%20this%20free%20ADRE%20Prep%20App!%20https://ab2001k.github.io/adre-prep/" target="_blank" class="social-icon"><i class="fa-brands fa-whatsapp"></i></a>
                 <a href="https://www.facebook.com/sharer/sharer.php?u=https://ab2001k.github.io/adre-prep/" target="_blank" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
                 <a href="https://twitter.com/intent/tweet?text=Free%20ADRE%20Mock%20Test%20App&url=https://ab2001k.github.io/adre-prep/" target="_blank" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
             </div>
@@ -151,6 +149,7 @@
     </div>
 
     <script>
+        // CONFIG
         const SUPABASE_URL = 'https://blltdzrfgryijzoastmt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_H0S0tAon1YanWFgKTWoilA_wMKZRZ5j'; 
         const ADMIN_EMAIL = "abhikdutta639@gmail.com";
@@ -160,7 +159,7 @@
         let currentUser = null;
         let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
 
-        // Valid Base64 "Pop" Sound
+        // --- VALID SOUND (POP) ---
         const popSound = new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAACAAAAA//8AAP//AAAAAA=="); 
         
         function playClick() {
@@ -176,6 +175,7 @@
             if(soundEnabled) playClick();
         }
 
+        // --- LOAD DATA ---
         async function init() {
             document.getElementById('sound-toggle').checked = soundEnabled;
 
@@ -212,6 +212,7 @@
             document.getElementById('next-level').innerText = `Next Level: ${level * 100}`;
         }
 
+        // --- AVATAR UPLOAD ---
         async function handleAvatarUpload(event) {
             playClick();
             const file = event.target.files[0];
@@ -228,7 +229,7 @@
             const { error: uploadError } = await _supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
             
             if (uploadError) {
-                alert("Upload failed. Ensure 'avatars' bucket exists and is Public.");
+                alert("Upload failed. Ensure you ran the SQL query to make the 'avatars' bucket PUBLIC.");
                 console.error(uploadError);
                 init(); 
                 return;
@@ -241,19 +242,19 @@
             setTimeout(init, 500); 
         }
 
+        // --- ACTIONS ---
         async function editName() {
             playClick();
             let oldName = document.getElementById('p-name').innerText.trim();
             let newName = prompt("Enter Name:", oldName);
             if(newName && newName !== oldName) {
                 await _supabase.from('profiles').upsert({ id: currentUser.id, full_name: newName });
-                init();
+                init(); 
             }
         }
 
         async function togglePrivacy(el) {
             playClick();
-            // This updates Supabase immediately. Index.html will filter based on this value.
             const { error } = await _supabase.from('profiles').update({ is_public: el.checked }).eq('id', currentUser.id);
             if(error) { alert("Failed to update privacy."); el.checked = !el.checked; }
         }
@@ -281,4 +282,3 @@
     </script>
 </body>
 </html>
-
