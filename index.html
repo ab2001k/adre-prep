@@ -116,20 +116,6 @@
         .input-field { width: 90%; padding: 12px; border-radius: 10px; border: 1px solid #444; background: #222; color: white; margin-bottom: 12px; font-family: 'Outfit', sans-serif; }
         .submit-btn { background: var(--neon-blue); color: #000; border: none; width: 100%; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* PROFILE MODAL & UPLOAD */
-        .profile-img-large { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--neon-blue); margin: 0 auto 10px; cursor: pointer; background: #333; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-        .profile-img-large img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-img-large:hover::after { content: "📷"; position: absolute; background: rgba(0,0,0,0.5); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; }
-        
-        /* TOGGLE SWITCH */
-        .toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--neon-blue); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
         /* DEV & FEEDBACK STYLES */
         .dev-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-blue); margin-bottom: 10px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
         .dev-role { color: #aaa; font-size: 12px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; display: block;}
@@ -218,41 +204,19 @@
         </div>
     </div>
 
-    <div id="profile-modal" class="modal-overlay">
-        <div class="modal-box">
-            <span onclick="document.getElementById('profile-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
-            <h2 style="margin-top:0;">Your Profile</h2>
-            
-            <div class="profile-img-large" onclick="document.getElementById('avatar-upload').click()">
-                <span id="avatar-initials" style="font-size:24px; font-weight:bold; color:#fff;">?</span>
-            </div>
-            <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
-            
-            <h3 id="profile-name-display" style="margin:5px 0;">Student Name</h3>
-            <p style="font-size:12px; color:#888;">Tap image to change</p>
-
-            <div class="toggle-row">
-                <span>🔊 Button Sounds</span>
-                <label class="switch">
-                    <input type="checkbox" id="sound-toggle" checked onchange="toggleSound(this)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <button onclick="logout()" class="submit-btn" style="background:transparent; border:1px solid #ff4b4b; color:#ff4b4b; margin-top:20px;">Log Out</button>
-        </div>
-    </div>
-
     <div id="about-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:400px; max-height:80vh; overflow-y:auto;">
             <span onclick="document.getElementById('about-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
+            
             <span class="dev-role">Developer</span>
             <img src="image.jpg" alt="Dev" class="dev-avatar">
             <h3 style="margin: 5px 0; color: white;">Abhik Dutta</h3>
             <span style="color: #aaa; font-size: 12px;">B.Voc in IT</span>
             <p class="dev-bio">"Hi, I built ADRE 3.0 Prep to make education free and accessible for all. Best of luck!"</p>
             <a href="mailto:Abhikdutta639@gmail.com" class="dev-contact">📧 Abhikdutta639@gmail.com</a>
+            
             <hr style="border:1px solid #333; margin:15px 0;">
+
             <h3 style="margin-top:0; font-size:16px;">💡 Suggestions?</h3>
             <form id="feedback-form" action="https://formspree.io/f/xeeqqanb" method="POST" onsubmit="handleFeedback(event)">
                 <input type="hidden" name="name" id="hidden-name">
@@ -269,6 +233,7 @@
             <div style="font-size:40px; margin-bottom:10px;">🔒</div>
             <h2 style="color:var(--neon-blue);">Unlock Premium Mocks</h2>
             <p style="color:#ccc; font-size:14px; margin-bottom:20px;">Tests take effort to create. Help us grow by sharing with 5 friends.</p>
+            
             <button onclick="shareOnWhatsApp()" class="submit-btn" style="background:#25D366; color:white; display:flex; align-items:center; justify-content:center; gap:10px;">
                 <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i>
                 <span>Share on WhatsApp</span>
@@ -308,24 +273,17 @@
         let currentUser = null; 
         let tempEmail = ""; 
         let shareStartTime = 0; 
+        // Read sound setting from localStorage
         let soundEnabled = localStorage.getItem('soundEnabled') !== 'false'; // Default True
 
-        // --- 1. SOUND & SETTINGS ---
-        // New Reliable Pop Sound (Base64)
+        // --- 1. SOUND SYSTEM ---
         const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=");
-        // A real short blip sound
-        const realPop = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
+        const realPop = new Audio("data:audio/mp3;base64,SUQzBAAAAAABAFhUQUcAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUQUcAAAAgAAADbWlub3JfdmVyc2lvbgAwAAADY29tcGF0aWJsZV9icmFuZHMAbXA0Mmlzb21tcDQyAAAAMlRTSVMAAAAaAAADZW5jb2RlcgBMYXZmNTguMjkuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAHP/80DEAAAAA0gAAAAH");
 
         function playClick() {
             if(!soundEnabled) return;
             realPop.currentTime = 0;
             realPop.play().catch(e => {});
-        }
-
-        function toggleSound(checkbox) {
-            soundEnabled = checkbox.checked;
-            localStorage.setItem('soundEnabled', soundEnabled);
-            if(soundEnabled) playClick();
         }
 
         // --- 2. DYNAMIC SUBJECT LOADER ---
@@ -441,37 +399,6 @@
             }
         }
 
-        // Profile Picture Upload
-        async function handleAvatarUpload(event) {
-            const file = event.target.files[0];
-            if(!file || !currentUser) return;
-            
-            // Upload to 'avatars' bucket
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUser.id}-${Math.random()}.${fileExt}`;
-            const filePath = `${fileName}`;
-
-            // 1. Upload
-            const { error: uploadError } = await _supabase.storage.from('avatars').upload(filePath, file);
-            if(uploadError) { alert("Upload Failed: Create 'avatars' bucket in Supabase."); return; }
-
-            // 2. Get URL
-            const { data } = _supabase.storage.from('avatars').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            // 3. Update Profile
-            await _supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
-            
-            // 4. Update UI
-            document.querySelector('.profile-img-large').innerHTML = `<img src="${publicUrl}">`;
-            alert("Profile Picture Updated!");
-        }
-
-        async function logout() {
-            await _supabase.auth.signOut();
-            location.reload();
-        }
-
         // --- 5. UTILITIES ---
         function getStorageKey() { return currentUser ? "attempts_" + currentUser.id : "attempts_guest"; }
         
@@ -508,14 +435,10 @@
                 else data.forEach((user, index) => {
                     let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
                     
-                    // Display Avatar or Initials
+                    // Avatar Logic
                     let avatarHtml = "";
-                    if(user.avatar_url) {
-                        avatarHtml = `<img src="${user.avatar_url}" alt="A">`;
-                    } else {
-                        let initials = user.full_name ? user.full_name.charAt(0).toUpperCase() : "?";
-                        avatarHtml = initials;
-                    }
+                    if(user.avatar_url) avatarHtml = `<img src="${user.avatar_url}" alt="A">`;
+                    else avatarHtml = user.full_name ? user.full_name.charAt(0).toUpperCase() : "?";
                     
                     list.innerHTML += `
                     <li class="lb-item ${rankClass}">
@@ -584,9 +507,6 @@
 
         // --- INIT ---
         window.onload = async function() {
-            // Apply Sound Settings
-            document.getElementById('sound-toggle').checked = soundEnabled;
-
             const { data: { user } } = await _supabase.auth.getUser();
             const loginBtn = document.getElementById('login-btn');
             const profileBtn = document.getElementById('profile-btn');
@@ -604,26 +524,14 @@
             
             if (profileBtn) {
                 profileBtn.style.display = 'block'; 
-                // UPDATED: Opens Modal instead of navigating
-                profileBtn.onclick = function() { document.getElementById('profile-modal').style.display='flex'; };
+                // REDIRECT TO PROFILE.HTML
+                profileBtn.onclick = function() { window.location.href = 'profile.html'; };
 
                 let displayName = "Student"; 
                 try {
-                    const { data: profile } = await _supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
-                    if (profile) {
-                        if(profile.full_name) displayName = profile.full_name;
-                        // Populate Profile Modal
-                        document.getElementById('profile-name-display').innerText = displayName;
-                        if(profile.avatar_url) {
-                            document.querySelector('.profile-img-large').innerHTML = `<img src="${profile.avatar_url}">`;
-                        } else {
-                            document.getElementById('avatar-initials').innerText = displayName.charAt(0).toUpperCase();
-                        }
-                    } else if (user.user_metadata.full_name) {
-                        displayName = user.user_metadata.full_name;
-                        document.getElementById('profile-name-display').innerText = displayName;
-                        document.getElementById('avatar-initials').innerText = displayName.charAt(0).toUpperCase();
-                    }
+                    const { data: profile } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
+                    if (profile && profile.full_name) displayName = profile.full_name;
+                    else if (user.user_metadata.full_name) displayName = user.user_metadata.full_name;
                 } catch (error) { console.log(error); }
 
                 profileBtn.innerText = `Hi, ${displayName}`;
