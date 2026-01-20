@@ -253,16 +253,23 @@
         let tempEmail = ""; 
         let shareStartTime = 0; 
         
-        // --- SOUND LOGIC (Using your supplied Base64) ---
-        // This is a placeholder. If you have the actual base64 for click.wav, paste it inside the quotes below.
-        // I have used a standard short click sound here as per request logic change but you mentioned you have click.wav so use its base64.
-        const btnSound = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="); 
+        // --- SOUND LOGIC ---
+        // 1. Primary: Tries to play 'click.wav' from the root folder.
+        // 2. Fallback: If 'click.wav' is missing, it will log an error.
+        
+        const btnSound = new Audio("click.wav"); 
+        
+        // NOTE: If you ever want to use the internal "New Type" sound (Glass Pop) instead of the file, 
+        // uncomment the line below:
+        // const btnSound = new Audio("data:audio/wav;base64,UklGRiIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=");
 
         function playClick() { 
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             if(isSoundOn) { 
-                btnSound.currentTime = 0; 
-                btnSound.play().catch(()=>{}); 
+                // cloneNode allows the sound to overlap (play rapidly)
+                const sound = btnSound.cloneNode();
+                sound.volume = 0.4; 
+                sound.play().catch(e => { /* Ignored if file missing or interaction blocked */ }); 
             } 
         }
 
