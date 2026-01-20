@@ -61,9 +61,26 @@
         
         .user-badge { display: none; font-size: 14px; font-weight: bold; color: #00ff88; border: 1px solid #00ff88; padding: 5px 12px; border-radius: 20px; background: rgba(0, 255, 136, 0.1); text-transform: capitalize; cursor: pointer; font-family: 'Outfit', sans-serif; }
         
-        /* SIDEBAR */
-        .sidebar { position: fixed; top: 0; right: -320px; width: 280px; height: 100vh; background: rgba(13, 14, 20, 0.95); backdrop-filter: blur(20px); border-left: 1px solid rgba(255,255,255,0.1); transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000; padding: 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-        .sidebar.active { right: 0; } .close-sidebar { text-align: right; cursor: pointer; color: #aaa; margin-bottom: 20px; }
+        /* SIDEBAR & OVERLAY */
+        /* Overlay allows tapping outside to close */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(2px);
+            transition: opacity 0.3s;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        .sidebar { 
+            position: fixed; top: 0; right: -320px; width: 280px; height: 100vh; 
+            background: rgba(13, 14, 20, 0.95); backdrop-filter: blur(20px); 
+            border-left: 1px solid rgba(255,255,255,0.1); 
+            transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            z-index: 1000; padding: 20px; 
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5); 
+        }
+        .sidebar.active { right: 0; } 
+        .close-sidebar { text-align: right; cursor: pointer; color: #aaa; margin-bottom: 20px; }
+        
         .notif-item { padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--neon-blue); }
         .notif-item h4 { margin: 0 0 5px 0; font-size: 14px; } .notif-item p { margin: 0; font-size: 12px; color: #bbb; }
         
@@ -136,6 +153,8 @@
             </div>
         </div>
     </div>
+
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <div id="sidebar" class="sidebar">
         <div class="close-sidebar" onclick="toggleSidebar()">CLOSE ✕</div>
@@ -254,29 +273,29 @@
         let shareStartTime = 0; 
         
         // --- SOUND LOGIC ---
-        // 1. Primary: Tries to play 'click.wav' from the root folder.
-        // 2. Fallback: If 'click.wav' is missing, it will log an error.
-        
         const btnSound = new Audio("click.wav"); 
-        
-        // NOTE: If you ever want to use the internal "New Type" sound (Glass Pop) instead of the file, 
-        // uncomment the line below:
-        // const btnSound = new Audio("data:audio/wav;base64,UklGRiIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=");
-
         function playClick() { 
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             if(isSoundOn) { 
-                // cloneNode allows the sound to overlap (play rapidly)
                 const sound = btnSound.cloneNode();
                 sound.volume = 0.4; 
-                sound.play().catch(e => { /* Ignored if file missing or interaction blocked */ }); 
+                sound.play().catch(e => { }); 
             } 
         }
 
-        // --- SIDEBAR SWIPE LOGIC ---
+        // --- SIDEBAR SWIPE & TOGGLE LOGIC ---
         let touchStartX = 0;
         let touchEndX = 0;
-        const sidebar = document.getElementById('sidebar');
+        
+        // Use Overlay for Background Tap
+        function toggleSidebar() {
+            playClick();
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebar-overlay');
+            sb.classList.toggle('active');
+            ov.classList.toggle('active');
+            document.querySelector('.red-dot').style.display = 'none';
+        }
 
         document.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
@@ -288,11 +307,20 @@
         }, {passive: false});
         
         function handleSwipe() {
-            if (touchStartX < 30 && touchEndX > touchStartX + 50) { // Swipe Right to Open (from edge)
-                toggleSidebar();
+            const sidebar = document.getElementById('sidebar');
+            const screenWidth = window.innerWidth;
+            
+            // 1. OPEN: Swipe LEFT from RIGHT EDGE (if sidebar not active)
+            if (!sidebar.classList.contains('active')) {
+                if (touchStartX > (screenWidth - 40) && touchEndX < touchStartX - 50) {
+                    toggleSidebar();
+                }
             }
-            if (sidebar.classList.contains('active') && touchStartX > touchEndX + 50) { // Swipe Left to Close
-                toggleSidebar();
+            // 2. CLOSE: Swipe RIGHT anywhere on sidebar to close
+            else {
+                if (touchStartX < touchEndX - 50) {
+                    toggleSidebar();
+                }
             }
         }
 
@@ -518,12 +546,6 @@
             document.getElementById('home-page').style.display = 'block'; 
         }
 
-        function toggleSidebar() { 
-            playClick();
-            document.getElementById('sidebar').classList.toggle('active'); 
-            document.querySelector('.red-dot').style.display = 'none'; 
-        }
-
         function openShareModal() { playClick(); document.getElementById('share-modal').style.display = 'flex'; }
         
         function shareOnWhatsApp() {
@@ -545,7 +567,7 @@
             document.removeEventListener("visibilitychange", checkShareSuccess);
             window.removeEventListener("focus", checkShareSuccess);
             const timeSpent = Date.now() - shareStartTime;
-            if(timeSpent < 10) { // FIXED: Reduced threshold from 2500 to 10
+            if(timeSpent < 10) { 
                 document.getElementById('share-modal').style.display = 'none';
                 document.getElementById('share-error-modal').style.display = 'flex';
             } else {
