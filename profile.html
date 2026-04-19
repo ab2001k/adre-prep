@@ -7,7 +7,11 @@
     <link rel="icon" href="favicon.ico" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
     <style>
         /* --- GLOBAL FIX: REMOVE BLUE TAP HIGHLIGHT --- */
         * { -webkit-tap-highlight-color: transparent; }
@@ -154,13 +158,22 @@
     </div>
 
     <script>
-        // CONFIG
-        const SUPABASE_URL = 'https://blltdzrfgryijzoastmt.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_H0S0tAon1YanWFgKTWoilA_wMKZRZ5j'; 
-        const ADMIN_EMAIL = "abhikdutta639@gmail.com";
+        // --- FIREBASE SETUP ---
+        // REPLACE THESE WITH YOUR ACTUAL FIREBASE PROJECT CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        const { createClient } = supabase;
-        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const ADMIN_EMAIL = "abhikdutta639@gmail.com";
         let currentUser = null;
         let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
 
@@ -180,17 +193,20 @@
             if(soundEnabled) playClick();
         }
 
-        // --- LOAD DATA ---
-        async function init() {
+        // --- LOAD DATA (Firebase implementation) ---
+        auth.onAuthStateChanged(async (user) => {
             document.getElementById('sound-toggle').checked = soundEnabled;
 
-            const { data: { user } } = await _supabase.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
             currentUser = user;
 
-            const { data: profile } = await _supabase.from('profiles').select('*').eq('id', user.id).single();
+            let profile = null;
+            try {
+                const docRef = await db.collection('profiles').doc(user.uid).get();
+                if (docRef.exists) profile = docRef.data();
+            } catch(e) { console.error("Error fetching profile", e); }
             
-            const name = profile?.full_name || user.user_metadata.full_name || "Student";
+            const name = profile?.full_name || user.displayName || "Student";
             const score = profile?.total_score || 0;
             const isPublic = profile?.is_public ?? true;
             const avatarUrl = profile?.avatar_url;
@@ -201,7 +217,8 @@
             document.getElementById('privacy-toggle').checked = isPublic;
 
             if(avatarUrl) {
-                document.getElementById('avatar-display').innerHTML = `<img src="${avatarUrl}?t=${new Date().getTime()}" alt="Avatar">`;
+                // If using base64, we don't need cache-busting query params like URLs need
+                document.getElementById('avatar-display').innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
             } else {
                 let initials = name.charAt(0).toUpperCase();
                 document.getElementById('avatar-display').innerText = initials;
@@ -215,9 +232,9 @@
             document.getElementById('level-text').innerText = `LEVEL ${level} • ${title.toUpperCase()}`;
             document.getElementById('progress-bar').style.width = `${progress}%`;
             document.getElementById('next-level').innerText = `Next Level: ${level * 100}`;
-        }
+        });
 
-        // --- AVATAR UPLOAD ---
+        // --- AVATAR UPLOAD (Canvas Compression -> Firestore Base64) ---
         async function handleAvatarUpload(event) {
             playClick();
             const file = event.target.files[0];
@@ -227,24 +244,48 @@
 
             document.getElementById('avatar-display').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; 
 
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${currentUser.id}.${fileExt}`;
-            const filePath = `${fileName}`;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 150; // Shrink to 150x150 to keep the data string tiny
+                    const MAX_HEIGHT = 150;
+                    let width = img.width;
+                    let height = img.height;
 
-            const { error: uploadError } = await _supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
-            
-            if (uploadError) {
-                alert("Upload failed. Ensure you ran the SQL query to make the 'avatars' bucket PUBLIC.");
-                console.error(uploadError);
-                init(); 
-                return;
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convert to base64 jpeg with 80% quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                    try {
+                        // Save the base64 string directly to the profile document
+                        await db.collection('profiles').doc(currentUser.uid).set({ avatar_url: dataUrl }, { merge: true });
+                        document.getElementById('avatar-display').innerHTML = `<img src="${dataUrl}" alt="Avatar">`;
+                    } catch(err) {
+                        alert("Error saving avatar. Check connection.");
+                        console.error(err);
+                        document.getElementById('avatar-display').innerText = "🧑‍🎓";
+                    }
+                }
+                img.src = e.target.result;
             }
-
-            const { data } = _supabase.storage.from('avatars').getPublicUrl(filePath);
-            const publicUrl = data.publicUrl;
-
-            await _supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
-            setTimeout(init, 500); 
+            reader.readAsDataURL(file);
         }
 
         // --- ACTIONS ---
@@ -253,15 +294,25 @@
             let oldName = document.getElementById('p-name').innerText.trim();
             let newName = prompt("Enter Name:", oldName);
             if(newName && newName !== oldName) {
-                await _supabase.from('profiles').upsert({ id: currentUser.id, full_name: newName });
-                init(); 
+                try {
+                    await db.collection('profiles').doc(currentUser.uid).set({ full_name: newName }, { merge: true });
+                    // Refresh current user name in auth if needed, but Firestore is the main display source
+                    await currentUser.updateProfile({ displayName: newName });
+                    document.getElementById('p-name').innerHTML = `${newName} <button class="edit-btn" onclick="editName()"><i class="fa-solid fa-pen"></i></button>`;
+                } catch(error) {
+                    alert("Failed to update name.");
+                }
             }
         }
 
         async function togglePrivacy(el) {
             playClick();
-            const { error } = await _supabase.from('profiles').update({ is_public: el.checked }).eq('id', currentUser.id);
-            if(error) { alert("Failed to update privacy."); el.checked = !el.checked; }
+            try {
+                await db.collection('profiles').doc(currentUser.uid).update({ is_public: el.checked });
+            } catch(error) {
+                alert("Failed to update privacy."); 
+                el.checked = !el.checked; 
+            }
         }
 
         function openContributionMail() {
@@ -273,11 +324,9 @@
 
         async function logout() {
             playClick();
-            await _supabase.auth.signOut();
+            await auth.signOut();
             window.location.href = 'index.html';
         }
-
-        window.onload = init;
 
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function(e) {
@@ -286,5 +335,4 @@
         });
     </script>
 </body>
-
 </html>
