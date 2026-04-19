@@ -35,7 +35,9 @@
       });
     </script>
     
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     
     <style>
         /* --- GLOBAL STYLES --- */
@@ -202,14 +204,10 @@
             <span onclick="document.getElementById('login-modal').style.display='none'" style="float:right; cursor:pointer;">✕</span>
             <h2>Student Login</h2>
             <div id="step-1">
-                <input type="text" id="name-input" class="input-field" placeholder="Full Name">
+                <input type="text" id="name-input" class="input-field" placeholder="Full Name (For New Users)">
                 <input type="email" id="email-input" class="input-field" placeholder="Email">
-                <button onclick="sendOtp()" class="submit-btn">Get OTP Code</button>
-            </div>
-            <div id="step-2" style="display:none;">
-                <input type="text" id="otp-input" class="input-field" placeholder="Enter 6-digit Code">
-                <button onclick="verifyOtp()" class="submit-btn">Verify & Login</button>
-                <span class="text-link" onclick="resetLogin()">Resend OTP / Change Email</span>
+                <input type="password" id="password-input" class="input-field" placeholder="Password (Min 6 Chars)">
+                <button onclick="handleFirebaseLogin()" class="submit-btn">Login / Sign Up</button>
             </div>
             <p id="login-msg" style="color:#ff4b4b; font-size:12px; margin-top:10px;"></p>
         </div>
@@ -263,13 +261,24 @@
         // CONFIG
         const MENU_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=0&single=true&output=csv';
         const NOTIF_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtoNQB-1KLeROQT5KvryYIcvc-ooEVOBFg-r_H1cFkrjCAPUbbGoZ8Evrli4N6qiKRWUeT2BPUqvcn/pub?output=csv';
-        const SUPABASE_URL = 'https://blltdzrfgryijzoastmt.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_H0S0tAon1YanWFgKTWoilA_wMKZRZ5j'; 
+        
+        // --- FIREBASE SETUP ---
+        // REPLACE THESE WITH YOUR ACTUAL FIREBASE PROJECT CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        const { createClient } = supabase;
-        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
         let currentUser = null; 
-        let tempEmail = ""; 
         let shareStartTime = 0; 
         
         // --- SOUND LOGIC ---
@@ -287,7 +296,6 @@
         let touchStartX = 0;
         let touchEndX = 0;
         
-        // Use Overlay for Background Tap
         function toggleSidebar() {
             playClick();
             const sb = document.getElementById('sidebar');
@@ -309,18 +317,10 @@
         function handleSwipe() {
             const sidebar = document.getElementById('sidebar');
             const screenWidth = window.innerWidth;
-            
-            // 1. OPEN: Swipe LEFT from RIGHT EDGE (if sidebar not active)
             if (!sidebar.classList.contains('active')) {
-                if (touchStartX > (screenWidth - 40) && touchEndX < touchStartX - 50) {
-                    toggleSidebar();
-                }
-            }
-            // 2. CLOSE: Swipe RIGHT anywhere on sidebar to close
-            else {
-                if (touchStartX < touchEndX - 50) {
-                    toggleSidebar();
-                }
+                if (touchStartX > (screenWidth - 40) && touchEndX < touchStartX - 50) toggleSidebar();
+            } else {
+                if (touchStartX < touchEndX - 50) toggleSidebar();
             }
         }
 
@@ -390,54 +390,63 @@
         
         function openAbout() { playClick(); document.getElementById('about-modal').style.display='flex'; }
 
-        // --- AUTH ---
+        // --- AUTH LOGIC (Firebase) ---
         function openLogin() { playClick(); document.getElementById('login-modal').style.display='flex'; }
 
-        function resetLogin() {
-             document.getElementById('step-2').style.display = 'none';
-             document.getElementById('step-1').style.display = 'block';
-             document.getElementById('login-msg').innerText = "";
-        }
-        
-        async function sendOtp() {
+        async function handleFirebaseLogin() {
             playClick();
             const name = document.getElementById('name-input').value;
             const email = document.getElementById('email-input').value;
-            if(name.length < 2 || !email.includes('@')) return;
-            document.getElementById('login-msg').innerText = "Sending...";
-            tempEmail = email;
-            const { error } = await _supabase.auth.signInWithOtp({ email, options: { data: { full_name: name } } });
-            if (error) document.getElementById('login-msg').innerText = "Error: " + error.message; 
-            else { 
-                document.getElementById('step-1').style.display = 'none';
-                document.getElementById('step-2').style.display = 'block';
-                document.getElementById('login-msg').innerText = "OTP Sent!";
-            }
-        }
+            const password = document.getElementById('password-input').value;
 
-        async function verifyOtp() {
-            playClick();
-            const token = document.getElementById('otp-input').value;
-            const { data, error } = await _supabase.auth.verifyOtp({ email: tempEmail, token, type: 'email' });
-            if (error) document.getElementById('login-msg').innerText = "Wrong Code!"; 
-            else { 
-                document.getElementById('login-msg').innerText = "Success!"; 
-                const { user } = data;
-                if(user) {
-                    const name = user.user_metadata.full_name || "Student";
-                    await _supabase.from('profiles').upsert({ id: user.id, full_name: name }, { onConflict: 'id', ignoreDuplicates: true }); 
+            if(!email.includes('@') || password.length < 6) {
+                document.getElementById('login-msg').innerText = "Please enter a valid email and 6+ character password.";
+                return;
+            }
+
+            document.getElementById('login-msg').innerText = "Processing...";
+
+            try {
+                // Try logging in existing user
+                await auth.signInWithEmailAndPassword(email, password);
+                document.getElementById('login-msg').innerText = "Success! Logging you in...";
+                setTimeout(() => { document.getElementById('login-modal').style.display='none'; }, 1000);
+            } catch (error) {
+                // If user doesn't exist, try creating a new account
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    if(name.length < 2) {
+                        document.getElementById('login-msg').innerText = "New users must provide a Full Name.";
+                        return;
+                    }
+                    try {
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        await userCredential.user.updateProfile({ displayName: name });
+                        
+                        // Save profile to Firestore
+                        await db.collection('profiles').doc(userCredential.user.uid).set({
+                            full_name: name,
+                            is_public: true,
+                            total_score: 0
+                        }, { merge: true });
+
+                        document.getElementById('login-msg').innerText = "Account Created! Welcome.";
+                        setTimeout(() => { document.getElementById('login-modal').style.display='none'; }, 1000);
+                    } catch (signUpError) {
+                        document.getElementById('login-msg').innerText = signUpError.message;
+                    }
+                } else {
+                    document.getElementById('login-msg').innerText = error.message;
                 }
-                setTimeout(() => { document.getElementById('login-modal').style.display='none'; location.reload(); }, 1000); 
             }
         }
 
         // --- INIT & UTILS ---
-        window.onload = async function() {
-            const { data: { user } } = await _supabase.auth.getUser();
+        auth.onAuthStateChanged(async (user) => {
             const loginBtn = document.getElementById('login-btn');
             const profileBtn = document.getElementById('profile-btn');
 
             if (!user) {
+                currentUser = null;
                 if(loginBtn) loginBtn.style.display = 'block';
                 if(profileBtn) profileBtn.style.display = 'none';
                 loadLeaderboard();
@@ -454,25 +463,30 @@
                 
                 let displayName = "Student"; 
                 try {
-                    const { data: profile } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
-                    if (profile && profile.full_name) displayName = profile.full_name;
-                    else if (user.user_metadata.full_name) displayName = user.user_metadata.full_name;
+                    // Fetch profile from Firestore
+                    const docRef = await db.collection('profiles').doc(user.uid).get();
+                    if (docRef.exists && docRef.data().full_name) {
+                        displayName = docRef.data().full_name;
+                    } else if (user.displayName) {
+                        displayName = user.displayName;
+                    }
                 } catch (error) { console.log(error); }
 
                 profileBtn.innerText = `Hi, ${displayName}`;
             }
 
             if(document.getElementById('hidden-name')) {
-                document.getElementById('hidden-name').value = user.user_metadata.full_name || "Student";
+                document.getElementById('hidden-name').value = user.displayName || "Student";
                 document.getElementById('hidden-email').value = user.email;
             }
             
             updateAttemptedVisuals();
             loadLeaderboard();
             loadNotifications();
-        };
+        });
 
-        function getStorageKey() { return currentUser ? "attempts_" + currentUser.id : "attempts_guest"; }
+        // Use uid instead of id for Firebase
+        function getStorageKey() { return currentUser ? "attempts_" + currentUser.uid : "attempts_guest"; }
         
         function attemptOpen(url, req) {
             playClick();
@@ -501,43 +515,45 @@
         function loadLeaderboard() {
             const list = document.getElementById('leaderboard-list');
             if(!list) return;
-            // FILTER: is_public = true
-            _supabase.from('profiles').select('full_name, total_score, avatar_url')
-                .eq('is_public', true)
-                .order('total_score', { ascending: false })
-                .limit(50)
-                .then(({ data, error }) => {
-                    list.innerHTML = "";
-                    if(error) {
-                        console.error("Leaderboard Error:", error);
-                        list.innerHTML = '<p style="text-align:center; color:#666;">Check connection.</p>';
-                        return;
-                    }
-                    if(!data || data.length === 0) {
-                        list.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">No scores yet.</p>';
-                    } else {
-                        data.forEach((user, index) => {
-                            let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
-                            let avatarHtml = "";
-                            if(user.avatar_url) {
-                                avatarHtml = `<img src="${user.avatar_url}?t=${new Date().getTime()}" alt="A">`;
-                            } else {
-                                let initials = user.full_name ? user.full_name.charAt(0).toUpperCase() : "?";
-                                avatarHtml = initials;
-                            }
-                            
-                            list.innerHTML += `
-                            <li class="lb-item ${rankClass}">
-                                <div class="lb-left-grp">
-                                    <span class="lb-rank">${index + 1}</span>
-                                    <div class="lb-avatar">${avatarHtml}</div>
-                                    <span class="lb-name">${user.full_name}</span>
-                                </div>
-                                <span class="lb-score">${user.total_score || 0} pts</span>
-                            </li>`;
-                        });
-                    }
-                });
+            
+            // Firestore Leaderboard Fetch
+            db.collection('profiles').where('is_public', '==', true)
+              .orderBy('total_score', 'desc').limit(50).get()
+              .then((snapshot) => {
+                  list.innerHTML = "";
+                  if (snapshot.empty) {
+                      list.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">No scores yet.</p>';
+                      return;
+                  }
+                  
+                  let index = 0;
+                  snapshot.forEach((doc) => {
+                      const user = doc.data();
+                      let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
+                      let avatarHtml = "";
+                      if(user.avatar_url) {
+                          avatarHtml = `<img src="${user.avatar_url}?t=${new Date().getTime()}" alt="A">`;
+                      } else {
+                          let initials = user.full_name ? user.full_name.charAt(0).toUpperCase() : "?";
+                          avatarHtml = initials;
+                      }
+                      
+                      list.innerHTML += `
+                      <li class="lb-item ${rankClass}">
+                          <div class="lb-left-grp">
+                              <span class="lb-rank">${index + 1}</span>
+                              <div class="lb-avatar">${avatarHtml}</div>
+                              <span class="lb-name">${user.full_name}</span>
+                          </div>
+                          <span class="lb-score">${user.total_score || 0} pts</span>
+                      </li>`;
+                      index++;
+                  });
+              })
+              .catch((error) => {
+                  console.error("Leaderboard Error:", error);
+                  list.innerHTML = '<p style="text-align:center; color:#666;">Check connection.</p>';
+              });
         }
 
         function goHome() { 
