@@ -326,7 +326,9 @@
         }
 
         // --- CONFIG ---
-        const QUESTION_BANK_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=408771765&single=true&output=csv'; 
+        // IMPORTANT: Ensure this link points to the specific tab with your questions (it needs a &gid=... value!)
+        const QUESTION_BANK_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?output=csv'; 
+        
         const SECONDS_PER_QUESTION = 60;
         
         let questions = [], currentQIndex = 0, userAnswers = {}, qStatus = {}, timeRemaining = 0, timerInterval;
@@ -365,32 +367,43 @@
                 if(profile && profile.full_name) studentName = profile.full_name;
                 else if(user.user_metadata.full_name) studentName = user.user_metadata.full_name;
             }
-            if (!testID) return document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">No Test ID provided.</p>';
+            if (!testID) return document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">No Test ID provided in URL.</p>';
             await loadQuestions();
         };
 
         async function loadQuestions() {
             try {
                 const response = await fetch(QUESTION_BANK_URL);
-                if (!response.ok) throw new Error("Failed to load");
+                if (!response.ok) throw new Error("Failed to load spreadsheet");
                 const text = await response.text();
                 parseCSV(text);
             } catch (e) {
-                document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">Error loading questions.</p>';
+                document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">Error loading questions. Check your connection.</p>';
             }
         }
 
         function parseCSV(csvText) {
-            const rows = csvText.split(/\r?\n/).slice(1);
+            const rows = csvText.split(/\r?\n/).slice(1); // skip header row
+            console.log("Found rows in sheet:", rows); // DEBUGGING: Check your browser console!
+            
             questions = [];
             rows.forEach(row => {
+                // Ensure we don't process empty rows at the end of the sheet
+                if(row.trim().length === 0) return; 
+                
                 const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(x => x.replace(/^"|"$/g, '').trim());
                 if(c.length >= 7 && c[0] === testID) {
                     questions.push({ q: c[1], options: [c[2], c[3], c[4], c[5]], correct: parseInt(c[6]) });
                 }
             });
-            if (questions.length === 0) document.getElementById('question-card').innerHTML = `<p style="text-align:center; color:var(--text-muted);">No questions found for this test.</p>`;
-            else initQuiz();
+            
+            if (questions.length === 0) {
+                document.getElementById('question-card').innerHTML = `
+                    <p style="text-align:center; color:var(--wrong-red);">No questions found for Test ID: <b>${testID}</b></p>
+                    <p style="text-align:center; font-size: 13px; color:var(--text-muted);">Please check the browser console for details to ensure you linked the correct Google Sheet tab.</p>`;
+            } else {
+                initQuiz();
+            }
         }
 
         const svgStar = `<svg class="star-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
@@ -415,16 +428,14 @@
         // --- REPORT QUESTION LOGIC ---
         function reportQuestion() {
             playSound();
-            
-            // Gather details
             const subject = subjectName;
             const qNo = currentQIndex + 1;
             const qId = testID;
             
-            // Generate the link dynamically
+            // Your Google Form link
             const formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLSdxAZVkTzwjUvPwhfB1W176ib2ZI-jc3jahhxw1dsIgGn2uNA/viewform?usp=pp_url";
             
-            // NOTE: Replace entry.111, entry.222, etc., with your actual Google Form entry IDs.
+            // Remember to replace .111, .222, .333 with your real Google Form entry IDs
             const prefilledURL = formBaseURL + 
                 "&entry.111=" + encodeURIComponent(subject) + 
                 "&entry.222=" + encodeURIComponent(qNo) + 
