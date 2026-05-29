@@ -326,8 +326,8 @@
         }
 
         // --- CONFIG ---
-        // IMPORTANT: Ensure this link points to the specific tab with your questions (it needs a &gid=... value!)
-        const QUESTION_BANK_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?output=csv'; 
+        // CORRECTED: Restored the exact Sheet 2 target (gid=408771765&single=true)
+        const QUESTION_BANK_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=408771765&single=true&output=csv'; 
         
         const SECONDS_PER_QUESTION = 60;
         
@@ -383,12 +383,10 @@
         }
 
         function parseCSV(csvText) {
-            const rows = csvText.split(/\r?\n/).slice(1); // skip header row
-            console.log("Found rows in sheet:", rows); // DEBUGGING: Check your browser console!
+            const rows = csvText.split(/\r?\n/).slice(1);
             
             questions = [];
             rows.forEach(row => {
-                // Ensure we don't process empty rows at the end of the sheet
                 if(row.trim().length === 0) return; 
                 
                 const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(x => x.replace(/^"|"$/g, '').trim());
@@ -399,8 +397,7 @@
             
             if (questions.length === 0) {
                 document.getElementById('question-card').innerHTML = `
-                    <p style="text-align:center; color:var(--wrong-red);">No questions found for Test ID: <b>${testID}</b></p>
-                    <p style="text-align:center; font-size: 13px; color:var(--text-muted);">Please check the browser console for details to ensure you linked the correct Google Sheet tab.</p>`;
+                    <p style="text-align:center; color:var(--wrong-red);">No questions found for Test ID: <b>${testID}</b></p>`;
             } else {
                 initQuiz();
             }
