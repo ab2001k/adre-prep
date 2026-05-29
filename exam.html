@@ -326,7 +326,6 @@
         }
 
         // --- CONFIG ---
-        // CORRECTED: Restored the exact Sheet 2 target (gid=408771765&single=true)
         const QUESTION_BANK_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=408771765&single=true&output=csv'; 
         
         const SECONDS_PER_QUESTION = 60;
@@ -361,12 +360,17 @@
 
         // --- INIT ---
         window.onload = async function() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if(user) {
-                const { data: profile } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
-                if(profile && profile.full_name) studentName = profile.full_name;
-                else if(user.user_metadata.full_name) studentName = user.user_metadata.full_name;
+            try {
+                const { data: { user } } = await _supabase.auth.getUser();
+                if(user) {
+                    const { data: profile } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
+                    if(profile && profile.full_name) studentName = profile.full_name;
+                    else if(user.user_metadata.full_name) studentName = user.user_metadata.full_name;
+                }
+            } catch(e) {
+                console.log("Supabase init skipped");
             }
+
             if (!testID) return document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">No Test ID provided in URL.</p>';
             await loadQuestions();
         };
@@ -574,12 +578,18 @@
             questions.forEach((q, i) => { if(userAnswers[i] === q.correct) score++; });
             const pct = Math.round((score/questions.length)*100);
             
-            const { data: { user } } = await _supabase.auth.getUser();
-            if(user) {
-                const { data: profile } = await _supabase.from('profiles').select('total_score').eq('id', user.id).single();
-                let newTotal = (profile ? profile.total_score : 0) + score;
-                await _supabase.from('profiles').upsert({ id: user.id, total_score: newTotal });
+            // --- TRY/CATCH PREVENTS FAILURES IF SUPABASE IS OFFLINE ---
+            try {
+                const { data: { user }, error: authError } = await _supabase.auth.getUser();
+                if(user && !authError) {
+                    const { data: profile } = await _supabase.from('profiles').select('total_score').eq('id', user.id).single();
+                    let newTotal = (profile && profile.total_score ? profile.total_score : 0) + score;
+                    await _supabase.from('profiles').upsert({ id: user.id, total_score: newTotal });
+                }
+            } catch (err) {
+                console.log("Supabase save skipped, showing score locally.");
             }
+            // -----------------------------------------------------------
 
             document.getElementById('studentNameDisplay').innerHTML = `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${studentName}`;
             document.getElementById('scoreVal').innerText = pct + "%";
