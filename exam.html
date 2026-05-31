@@ -648,18 +648,7 @@
             questions.forEach((q, i) => { if(userAnswers[i] === q.correct) score++; });
             const pct = Math.round((score/questions.length)*100);
             
-            // --- TRY/CATCH PREVENTS FAILURES IF SUPABASE IS OFFLINE ---
-            try {
-                const { data: { user }, error: authError } = await _supabase.auth.getUser();
-                if(user && !authError) {
-                    const { data: profile } = await _supabase.from('profiles').select('total_score').eq('id', user.id).single();
-                    let newTotal = (profile && profile.total_score ? profile.total_score : 0) + score;
-                    await _supabase.from('profiles').upsert({ id: user.id, total_score: newTotal });
-                }
-            } catch (err) {
-                console.log("Supabase save skipped, showing score locally.");
-            }
-            // -----------------------------------------------------------
+         
 
             document.getElementById('studentNameDisplay').innerHTML = `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${studentName}`;
             document.getElementById('scoreVal').innerText = pct + "%";
