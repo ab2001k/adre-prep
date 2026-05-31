@@ -22,18 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "f1fddec2-1dd5-47b4-b35f-ca39df0bd164",
-          safari_web_id: "web.onesignal.auto.662c778c-4ab6-4517-8ad0-9e9a32a53670",
-          notifyButton: { enable: false },
-        });
-        if (Notification.permission === "denied") document.getElementById('perm-warning').style.display = 'block';
-      });
-    </script>
+   
     
     <script>
         const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -50,7 +39,7 @@
             --glass-bg: rgba(255, 255, 255, 0.05);
             --glass-border: 1px solid rgba(255, 255, 255, 0.1);
             --glass-hover: rgba(255, 255, 255, 0.1);
-            --neon-blue: #00f2ff;
+            --neon-blue: #0099ff; /* Dimmer, darker blue for better contrast */
             --correct-green: #00ff88;
             --sidebar-bg: rgba(13, 14, 20, 0.95);
             --header-bg: rgba(0, 0, 0, 0.3);
@@ -124,13 +113,37 @@
         /* PAGE CONTENT & CARDS */
         .page-content { padding: 20px; max-width: 800px; margin: 0 auto; padding-bottom: 80px; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; margin-top: 20px; }
-        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: var(--glass-border); border-radius: 20px; padding: 25px 15px; text-align: center; cursor: pointer; transition: all 0.3s ease; animation: float 6s ease-in-out infinite; }
-        .glass-card:hover { background: var(--glass-hover); box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); transform: scale(1.03); animation-play-state: paused; }
+        
+        .glass-card { 
+            background: var(--glass-bg); backdrop-filter: blur(12px); 
+            border: var(--glass-border); border-radius: 20px; padding: 25px 15px; 
+            text-align: center; cursor: pointer; transition: all 0.3s ease; 
+            animation: float 6s ease-in-out infinite;
+            position: relative; 
+        }
+        .glass-card:hover { 
+            background: var(--glass-hover); 
+            border-color: var(--card-color, var(--neon-blue));
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+            transform: scale(1.03); 
+            animation-play-state: paused; 
+        }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0px); } }
-        .icon { font-size: 32px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; color: var(--neon-blue); } 
+        
+        .icon { font-size: 32px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; color: var(--card-color, var(--neon-blue)); transition: color 0.3s ease; } 
         .card-title { font-weight: 600; font-size: 16px; margin-bottom: 5px; color: var(--text-color); } 
         .card-sub { font-size: 12px; color: var(--text-muted); }
         
+        /* NEW TAG STYLES */
+        .new-tag {
+            position: absolute; top: -8px; right: -8px;
+            background: #ff4757; color: #fff; font-size: 10px;
+            font-weight: 800; padding: 4px 10px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4);
+            animation: pulse-tag 2s infinite; letter-spacing: 1px;
+        }
+        @keyframes pulse-tag { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
         /* SUBJECT PAGE */
         #subject-page { display: none; }
         .back-btn { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; cursor: pointer; margin-bottom: 20px; transition: all 0.3s ease; }
@@ -142,12 +155,12 @@
         .chapter-item.attempted span:first-child { color: var(--correct-green); font-weight: 500; } 
         .chapter-item.attempted .lock-indicator { color: var(--correct-green); }
         
-        /* PROMO SECTION (Replaced Leaderboard) */
+        /* PROMO SECTION */
         .promo-container { margin-top: 40px; background: var(--promo-bg); border: 2px dashed var(--neon-blue); border-radius: 20px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .promo-container:hover { transform: scale(1.02); background: var(--glass-hover); box-shadow: 0 10px 40px rgba(0, 242, 255, 0.15); }
+        .promo-container:hover { transform: scale(1.02); background: var(--glass-hover); box-shadow: 0 10px 40px rgba(0, 153, 255, 0.15); }
         .promo-title { display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--neon-blue); font-weight: 700; margin-bottom: 10px; }
         .promo-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
-        .promo-btn { background: var(--neon-blue); color: #fff; border: none; padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0, 242, 255, 0.3); }
+        .promo-btn { background: var(--neon-blue); color: #fff; border: none; padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0, 153, 255, 0.3); }
         .promo-btn:hover { background: var(--text-color); color: var(--bg-top); }
 
         /* MODALS */
@@ -162,6 +175,10 @@
     <div class="header">
         <div class="logo-area"><h2>ADRE <span>3.0</span></h2></div>
         <div class="header-actions">
+            <div class="action-btn" onclick="toggleSound()" id="sound-btn" title="Toggle Sound">
+                <i class="fa-solid fa-volume-high"></i>
+            </div>
+            
             <div class="action-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle Theme">
                 <i class="fa-solid fa-moon"></i>
             </div>
@@ -185,56 +202,57 @@
     <div id="home-page" class="page-content">
         <h3 style="color: var(--text-color);">Select Subject</h3>
         <div class="grid-container">
-            <div class="glass-card" onclick="openSubject('Reasoning')">
+            <div class="glass-card" onclick="openSubject('Reasoning')" style="--card-color: #a855f7;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.5.5 2.5 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></svg>
                 </span>
                 <div class="card-title">Reasoning</div><div class="card-sub">Logic</div>
             </div>
-            <div class="glass-card" onclick="openSubject('Maths')">
+            <div class="glass-card" onclick="openSubject('Maths')" style="--card-color: #ef4444;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
                 </span>
                 <div class="card-title">Maths</div><div class="card-sub">Quant</div>
             </div>
-            <div class="glass-card" onclick="openSubject('GK')">
+            <div class="glass-card" onclick="openSubject('GK')" style="--card-color: #10b981;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </span>
                 <div class="card-title">GK</div><div class="card-sub">Social Studies</div>
             </div>
-            <div class="glass-card" onclick="openSubject('English')">
+            <div class="glass-card" onclick="openSubject('English')" style="--card-color: #f59e0b;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
                 </span>
                 <div class="card-title">English</div><div class="card-sub">Grammar</div>
             </div>
-            <div class="glass-card" onclick="openSubject('Science')">
+            <div class="glass-card" onclick="openSubject('Science')" style="--card-color: #06b6d4;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M14 9.5 14 2"/></svg>
                 </span>
                 <div class="card-title">Science</div><div class="card-sub">PCMB</div>
             </div>
-            <div class="glass-card" onclick="openSubject('Assam')">
+            <div class="glass-card" onclick="openSubject('Assam')" style="--card-color: #eab308;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                 </span>
                 <div class="card-title">Assam</div><div class="card-sub">Culture</div>
             </div>
-            <div class="glass-card" onclick="openSubject('Notes')">
+            <div class="glass-card" onclick="openSubject('Notes')" style="--card-color: #ec4899;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
                 </span>
                 <div class="card-title">PDFs & Notes</div><div class="card-sub">Material</div>
             </div>
-            <div class="glass-card" onclick="openSubject('D.El.Ed PET')">
+            <div class="glass-card" onclick="openSubject('D.El.Ed PET')" style="--card-color: #3b82f6;">
+                <span class="new-tag">NEW</span>
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                 </span>
                 <div class="card-title">D.El.Ed PET</div><div class="card-sub">Entrance Prep</div>
             </div>
             
-            <div class="glass-card" onclick="openAbout()">
+            <div class="glass-card" onclick="openAbout()" style="--card-color: #8b5cf6;">
                 <span class="icon">
                     <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                 </span>
@@ -250,6 +268,10 @@
             </div>
             <div class="promo-desc">Supercharge your preparation with the best quality notes, guidebooks, and strictly syllabus-oriented materials.</div>
             <button class="promo-btn">Visit Chetona Publications</button>
+        </div>
+
+        <div style="text-align: center; padding: 30px 0 10px 0; color: var(--text-muted); font-size: 13px; font-weight: 500; letter-spacing: 1px;">
+            Designed by Abhik Dutta
         </div>
     </div>
 
@@ -297,6 +319,24 @@
 
         // --- SOUND LOGIC ---
         const btnSound = new Audio("click.wav"); 
+        
+        function updateSoundIcon() {
+            const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
+            const btnIcon = document.querySelector('#sound-btn i');
+            if(isSoundOn) {
+                btnIcon.className = 'fa-solid fa-volume-high';
+            } else {
+                btnIcon.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+        
+        function toggleSound() {
+            const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
+            localStorage.setItem('soundEnabled', !isSoundOn);
+            updateSoundIcon();
+            if(!isSoundOn) playClick(); // Test sound when turning it back on
+        }
+
         function playClick() { 
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             if(isSoundOn) { 
@@ -327,8 +367,9 @@
             updateThemeIcon();
         }
         
-        // Initialize Theme icon on load
+        // Initialize icons on load
         updateThemeIcon();
+        updateSoundIcon();
 
         // --- SIDEBAR SWIPE & TOGGLE LOGIC ---
         let touchStartX = 0;
@@ -369,7 +410,7 @@
             }
         }
 
-        // --- SUBJECT LOADING LOGIC (ALL TESTS UNLOCKED) ---
+        // --- SUBJECT LOADING LOGIC ---
         async function openSubject(subjectName) { 
             playClick();
             document.getElementById('home-page').style.display = 'none';
@@ -482,7 +523,6 @@
             }
         }
         
-        // Execute fetches on page load
         window.onload = () => {
             loadNotifications();
             updateAttemptedVisuals();
