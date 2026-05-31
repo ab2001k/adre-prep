@@ -351,8 +351,14 @@
             }
         }
 
-        // --- CONFIG ---
-        const QUESTION_BANK_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=408771765&single=true&output=csv'; 
+       // --- CONFIG & CACHING LOGIC ---
+        // REPLACE THESE GIDs WITH YOUR ACTUAL SHEET 1 AND SHEET 2 GIDs
+        const SHEET_1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=0&single=true&output=csv'; 
+        const SHEET_2_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=408771765&single=true&output=csv'; 
+        
+        const CACHE_KEY = 'adre_qbank_cache';
+        const CACHE_TIME_KEY = 'adre_qbank_time';
+        const CACHE_DURATION = 24 * 60 * 60 * 1000; // Cache valid for 24 hours
         
         const SECONDS_PER_QUESTION = 60;
         
@@ -364,11 +370,6 @@
         const testID = urlParams.get('id');
         const subjectName = urlParams.get('subject') || "Test";
         document.getElementById('test-subject-display').innerText = subjectName;
-
-        const SUPABASE_URL = 'https://blltdzrfgryijzoastmt.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_H0S0tAon1YanWFgKTWoilA_wMKZRZ5j'; 
-        const { createClient } = supabase;
-        const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- EXIT PROTECTION ---
         window.onbeforeunload = function() {
@@ -384,36 +385,79 @@
         }
         function exitSafely() { playSound(); isSubmitted = true; window.location.href = 'index.html'; }
 
-        // --- INIT ---
+        // --- FAST RETRIEVAL / CACHING INIT ---
         window.onload = async function() {
-            try {
-                const { data: { user } } = await _supabase.auth.getUser();
-                if(user) {
-                    const { data: profile } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
-                    if(profile && profile.full_name) studentName = profile.full_name;
-                    else if(user.user_metadata.full_name) studentName = user.user_metadata.full_name;
-                }
-            } catch(e) {
-                console.log("Supabase init skipped");
-            }
-
             if (!testID) return document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">No Test ID provided in URL.</p>';
-            await loadQuestions();
+            
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+            const now = Date.now();
+
+            // 1. If we have fresh cache, use it immediately (Zero Delay)
+            if (cachedData && cachedTime && (now - parseInt(cachedTime)) < CACHE_DURATION) {
+                parseCSV(cachedData);
+                // 2. Silently fetch new updates in background to keep cache fresh for next time
+                updateCacheSilently();
+            } else {
+                // 3. Otherwise, fetch, cache, and parse
+                await fetchAndCache();
+            }
         };
 
-        async function loadQuestions() {
+        async function fetchAndCombineSheets() {
+            // Fetch both sheets at the exact same time
+            const [response1, response2] = await Promise.all([
+                fetch(SHEET_1_URL),
+                fetch(SHEET_2_URL)
+            ]);
+
+            if (!response1.ok || !response2.ok) throw new Error("Failed to load one or more sheets");
+
+            const text1 = await response1.text();
+            let text2 = await response2.text();
+
+            // Remove the header row from Sheet 2 so we don't have a header stuck in the middle of our data
+            const text2Lines = text2.split(/\r?\n/);
+            text2Lines.shift(); 
+            text2 = text2Lines.join('\n');
+
+            // Combine them
+            return text1 + '\n' + text2;
+        }
+
+        async function fetchAndCache() {
             try {
-                const response = await fetch(QUESTION_BANK_URL);
-                if (!response.ok) throw new Error("Failed to load spreadsheet");
-                const text = await response.text();
-                parseCSV(text);
+                const combinedCSV = await fetchAndCombineSheets();
+                
+                // Save the combined data to localStorage
+                localStorage.setItem(CACHE_KEY, combinedCSV);
+                localStorage.setItem(CACHE_TIME_KEY, Date.now());
+                
+                parseCSV(combinedCSV);
             } catch (e) {
-                document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">Error loading questions. Check your connection.</p>';
+                // Fallback to stale cache if offline
+                const staleData = localStorage.getItem(CACHE_KEY);
+                if (staleData) {
+                    parseCSV(staleData);
+                } else {
+                    document.getElementById('question-card').innerHTML = '<p style="text-align:center; color:var(--wrong-red);">Error loading questions. Check your internet connection.</p>';
+                }
+            }
+        }
+
+        async function updateCacheSilently() {
+            try {
+                const combinedCSV = await fetchAndCombineSheets();
+                // Update cache quietly in the background
+                localStorage.setItem(CACHE_KEY, combinedCSV);
+                localStorage.setItem(CACHE_TIME_KEY, Date.now());
+            } catch (e) { 
+                /* Ignore silent errors in background */ 
             }
         }
 
         function parseCSV(csvText) {
-            const rows = csvText.split(/\r?\n/).slice(1);
+            const rows = csvText.split(/\r?\n/).slice(1); // Skip sheet 1 header
             
             questions = [];
             rows.forEach(row => {
