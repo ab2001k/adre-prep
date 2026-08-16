@@ -86,6 +86,17 @@
         }
         .theme-btn:active { transform: scale(0.9); }
 
+        /* NEW: Mode Switch styling */
+        .mode-switch {
+            background: var(--glass-bg); border: var(--glass-border); color: var(--text-muted);
+            padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s; display: flex; align-items: center;
+        }
+        .mode-switch.quiz-active {
+            background: color-mix(in srgb, var(--correct-green) 15%, transparent);
+            border-color: var(--correct-green); color: var(--correct-green);
+        }
+
         .timer-box {
             font-family: monospace; font-size: 16px; font-weight: bold;
             color: var(--neon-blue); border: 1px solid var(--neon-blue);
@@ -235,8 +246,13 @@
             </button>
             <button class="theme-btn" onclick="toggleSound()" id="sound-btn" title="Toggle Sound"></button>
             <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle Theme"></button>
+            
+            <!-- NEW: Quiz Mode Toggle -->
+            <div class="mode-switch" onclick="toggleQuizMode()" id="mode-btn" title="Toggle Quiz Mode">
+                <span id="mode-text">Mock Mode</span>
+            </div>
         </div>
-        <span style="font-size:15px; color:var(--text-muted); font-weight:600;" id="test-subject-display">Mock Test</span>
+        <span style="font-size:15px; color:var(--text-muted); font-weight:600; display:none;" id="test-subject-display">Mock Test</span>
         <div class="timer-box" id="timer">
             <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span id="timer-text">00:00</span>
@@ -342,12 +358,24 @@
 
         // --- SOUND SYSTEM ---
         const popSound = new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAACAAAAA//8AAP//AAAAAA=="); 
+        const correctSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3");
+        const wrongSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3");
+
         function playSound() {
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             if(isSoundOn) { 
                 const sound = popSound.cloneNode();
                 sound.volume = 0.3; 
                 sound.play().catch(e => {}); 
+            }
+        }
+
+        function playFeedbackSound(isCorrect) {
+            const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
+            if(isSoundOn) {
+                const sound = isCorrect ? correctSound.cloneNode() : wrongSound.cloneNode();
+                sound.volume = 0.4;
+                sound.play().catch(e => {});
             }
         }
 
@@ -364,12 +392,30 @@
         
         let questions = [], currentQIndex = 0, userAnswers = {}, qStatus = {}, timeRemaining = 0, timerInterval;
         let isReviewMode = false, isSubmitted = false;
+        let isQuizMode = false; // NEW: Quiz mode state
         let studentName = "Future Officer"; 
 
         const urlParams = new URLSearchParams(window.location.search);
         const testID = urlParams.get('id');
         const subjectName = urlParams.get('subject') || "Test";
         document.getElementById('test-subject-display').innerText = subjectName;
+
+        // --- NEW: QUIZ MODE TOGGLE ---
+        function toggleQuizMode() {
+            playSound();
+            isQuizMode = !isQuizMode;
+            const btn = document.getElementById('mode-btn');
+            const txt = document.getElementById('mode-text');
+            if(isQuizMode) {
+                btn.classList.add('quiz-active');
+                txt.innerText = "Quiz Mode";
+            } else {
+                btn.classList.remove('quiz-active');
+                txt.innerText = "Mock Mode";
+            }
+            // Refresh current question layout if it's already on screen
+            if(questions.length > 0) loadQuestion(currentQIndex);
+        }
 
         // --- EXIT PROTECTION ---
         window.onbeforeunload = function() {
@@ -496,21 +542,30 @@
             loadQuestion(0);
         }
 
-        // --- REPORT QUESTION LOGIC ---
+        // --- NEW: VERIFY QUESTION ON GOOGLE ---
+        function verifyQuestionOnGoogle() {
+            playSound();
+            const q = questions[currentQIndex];
+            const query = encodeURIComponent(q.q + " " + q.options.join(" "));
+            window.open("https://www.google.com/search?q=" + query, "_blank");
+        }
+
+        // --- UPDATED: REPORT QUESTION LOGIC ---
         function reportQuestion() {
             playSound();
-            const subject = subjectName;
-            const qNo = currentQIndex + 1;
-            const qId = testID;
+            
+            // Getting the actual data you requested
+            const testNumberText = subjectName; // e.g., "PET Mock 1"
+            const qNoText = currentQIndex + 1;  // e.g., "25"
             
             // Your Google Form link
             const formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLSdxAZVkTzwjUvPwhfB1W176ib2ZI-jc3jahhxw1dsIgGn2uNA/viewform?usp=pp_url";
             
-            // Remember to replace .111, .222, .333 with your real Google Form entry IDs
+            // IMPORTANT: Replace 'entry.111' with your real Google form entry ID for "Test Number"
+            // Replace 'entry.222' with your real Google form entry ID for "Question Number"
             const prefilledURL = formBaseURL + 
-                "&entry.111=" + encodeURIComponent(subject) + 
-                "&entry.222=" + encodeURIComponent(qNo) + 
-                "&entry.333=" + encodeURIComponent(qId);
+                "&entry.111=" + encodeURIComponent(testNumberText) + 
+                "&entry.222=" + encodeURIComponent(qNoText);
             
             window.open(prefilledURL, "_blank");
         }
@@ -520,20 +575,29 @@
             const q = questions[idx];
             const el = document.getElementById('question-card');
             
+            // NEW: Injected the Verify Button next to the Report button
             let html = `
                 <div class="q-meta">
                     <span class="q-badge">Question ${idx + 1} of ${questions.length}</span>
-                    <span class="report-link" onclick="reportQuestion()">
-                        <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
-                        Report
-                    </span>
+                    <div style="display:flex; gap: 15px;">
+                        <span class="report-link" style="color:var(--neon-blue);" onclick="verifyQuestionOnGoogle()">
+                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            Verify
+                        </span>
+                        <span class="report-link" onclick="reportQuestion()">
+                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+                            Report
+                        </span>
+                    </div>
                 </div>
                 <div class="q-text">${q.q}</div>
                 <div>`;
             
             q.options.forEach((opt, i) => {
                 let cls = 'opt-btn';
-                if(isReviewMode) {
+                
+                // NEW: Logic applies colors instantly if in Quiz Mode and an answer was picked
+                if(isReviewMode || (isQuizMode && userAnswers[idx] !== null)) {
                     if(i === q.correct) cls += ' correct'; 
                     else if(userAnswers[idx] === i) cls += ' wrong';
                 } else {
@@ -541,7 +605,10 @@
                 }
                 
                 const alpha = String.fromCharCode(65 + i);
-                html += `<button class="${cls}" onclick="selectOption(${i})" ${isReviewMode?'disabled':''}>
+                // Also disable buttons if in review mode OR if quiz mode answer is already submitted
+                const isDisabled = isReviewMode || (isQuizMode && userAnswers[idx] !== null) ? 'disabled' : '';
+
+                html += `<button class="${cls}" onclick="selectOption(${i})" ${isDisabled}>
                             <span style="font-weight:bold; color:var(--neon-blue); opacity:0.8; margin-right:5px;">${alpha}.</span> 
                             ${opt}
                          </button>`;
@@ -598,11 +665,23 @@
 
         // --- ACTIONS ---
         function selectOption(i) {
-            playSound();
             if(isReviewMode) return;
+            
+            // NEW: Prevent changing answer if already answered in Quiz Mode
+            if(isQuizMode && userAnswers[currentQIndex] !== null) return;
+            
             userAnswers[currentQIndex] = i;
             if(qStatus[currentQIndex] !== 'marked') qStatus[currentQIndex] = 'visited';
-            loadQuestion(currentQIndex); 
+            
+            // NEW: Instant feedback logic for Quiz Mode
+            if(isQuizMode) {
+                const isCorrect = (i === questions[currentQIndex].correct);
+                playFeedbackSound(isCorrect);
+                loadQuestion(currentQIndex); // Reload to show green/red colors immediately
+            } else {
+                playSound();
+                loadQuestion(currentQIndex); 
+            }
         }
 
         function nextQuestion() {
