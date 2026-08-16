@@ -25,7 +25,7 @@
             --glass-bg: rgba(255, 255, 255, 0.05);
             --glass-border: 1px solid rgba(255, 255, 255, 0.1);
             --glass-hover: rgba(255, 255, 255, 0.1);
-            --neon-blue: #0099ff; /* Dimmer, darker blue for better contrast */
+            --neon-blue: #0099ff; 
             --correct-green: #00ff88;
             --wrong-red: #ff4b4b;
             --mark-yellow: #ffcc00;
@@ -86,16 +86,17 @@
         }
         .theme-btn:active { transform: scale(0.9); }
 
-        /* NEW: Mode Switch styling */
+        /* MODE SWITCH (Improved for Android) */
         .mode-switch {
-            background: var(--glass-bg); border: var(--glass-border); color: var(--text-muted);
-            padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: bold;
-            cursor: pointer; transition: all 0.3s; display: flex; align-items: center;
+            background: var(--glass-bg); border: 2px solid var(--glass-border); color: var(--text-muted);
+            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center;
         }
         .mode-switch.quiz-active {
             background: color-mix(in srgb, var(--correct-green) 15%, transparent);
             border-color: var(--correct-green); color: var(--correct-green);
         }
+        .mode-switch:active { transform: scale(0.95); }
 
         .timer-box {
             font-family: monospace; font-size: 16px; font-weight: bold;
@@ -125,7 +126,7 @@
         .palette-stripe::-webkit-scrollbar { display: none; }
         
         .p-btn {
-            width: 42px; height: 42px; flex-shrink: 0; border-radius: 10px;
+            width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px;
             background: var(--glass-bg); border: var(--glass-border);
             color: var(--text-color); font-size: 14px; font-weight: bold;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -160,20 +161,22 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .q-meta { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
-        .q-badge { background: color-mix(in srgb, var(--neon-blue) 15%, transparent); color: var(--neon-blue); border: 1px solid var(--neon-blue); font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; }
-        .report-link { display: flex; align-items: center; gap: 5px; color: var(--wrong-red); font-size: 12px; font-weight: 500; cursor: pointer; opacity: 0.8; transition: 0.2s; }
-        .report-link:hover { opacity: 1; text-decoration: underline; }
+        .q-badge { background: color-mix(in srgb, var(--neon-blue) 15%, transparent); color: var(--neon-blue); border: 1px solid var(--neon-blue); font-size: 12px; padding: 4px 10px; border-radius: 8px; font-weight: bold; letter-spacing: 0.5px; }
+        .report-link { display: flex; align-items: center; gap: 5px; color: var(--wrong-red); font-size: 12px; font-weight: 500; cursor: pointer; opacity: 0.8; transition: 0.2s; padding: 5px; }
+        .report-link:active { opacity: 1; transform: scale(0.95); }
 
         .q-text { font-size: 18px; line-height: 1.6; margin-bottom: 30px; font-weight: 500; }
 
+        /* OPTIONS BUTTONS (Improved for Android touch targets) */
         .opt-btn {
-            width: 100%; text-align: left; padding: 16px 20px; margin-bottom: 15px;
-            background: var(--glass-bg); border: var(--glass-border);
-            border-radius: 12px; color: var(--text-color); font-size: 16px; cursor: pointer;
-            transition: all 0.2s; position: relative; -webkit-tap-highlight-color: transparent;
+            width: 100%; text-align: left; padding: 16px 20px; margin-bottom: 12px;
+            background: var(--glass-bg); border: 2px solid var(--glass-border);
+            border-radius: 16px; color: var(--text-color); font-size: 16px; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; -webkit-tap-highlight-color: transparent;
             display: flex; align-items: center; gap: 10px; font-family: inherit;
+            min-height: 56px; /* Great for mobile tapping */
         }
-        .opt-btn:active { transform: scale(0.98); background: var(--glass-hover); }
+        .opt-btn:active:not(:disabled) { transform: scale(0.97); background: var(--glass-hover); border-color: var(--neon-blue); }
         .opt-btn.selected { 
             background: color-mix(in srgb, var(--neon-blue) 15%, transparent); 
             border-color: var(--neon-blue); box-shadow: 0 0 15px color-mix(in srgb, var(--neon-blue) 20%, transparent); 
@@ -184,28 +187,28 @@
 
         /* --- 4. FOOTER CONTROLS --- */
         .footer-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 80px;
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 85px;
             background: var(--footer-bg); border-top: var(--glass-border);
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 20px; box-sizing: border-box; z-index: 20;
-            box-shadow: 0 -5px 30px rgba(0,0,0,0.1); transition: background 0.4s ease;
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.2); transition: background 0.4s ease;
         }
         
         .f-btn {
-            padding: 12px 20px; border-radius: 12px; font-weight: bold; font-size: 15px;
+            padding: 12px 20px; border-radius: 16px; font-weight: bold; font-size: 15px;
             border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
-            transition: all 0.2s; font-family: inherit;
+            transition: all 0.2s; font-family: inherit; min-height: 48px;
         }
-        .f-btn:active { transform: scale(0.95); }
+        .f-btn:active:not(:disabled) { transform: scale(0.93); }
         .f-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         
-        .btn-prev { background: var(--glass-bg); color: var(--text-color); border: var(--glass-border); }
-        .btn-mark { background: transparent; border: 1px solid var(--mark-yellow); color: var(--mark-yellow); }
-        .btn-next { background: var(--neon-blue); color: #ffffff; box-shadow: 0 0 15px color-mix(in srgb, var(--neon-blue) 40%, transparent); }
+        .btn-prev { background: var(--glass-bg); color: var(--text-color); border: 2px solid var(--glass-border); }
+        .btn-mark { background: transparent; border: 2px solid var(--mark-yellow); color: var(--mark-yellow); }
+        .btn-next { background: var(--neon-blue); color: #ffffff; box-shadow: 0 4px 15px color-mix(in srgb, var(--neon-blue) 40%, transparent); }
         
         .btn-submit { 
             background: var(--correct-green); color: #000; display: none; 
-            box-shadow: 0 0 15px color-mix(in srgb, var(--correct-green) 40%, transparent); 
+            box-shadow: 0 4px 15px color-mix(in srgb, var(--correct-green) 40%, transparent); 
             justify-content: center; width: auto; padding: 12px 25px;
         }
 
@@ -220,6 +223,29 @@
             border-radius: 25px; text-align: center; border: var(--glass-border);
             box-shadow: 0 20px 50px rgba(0,0,0,0.3); transition: background 0.4s ease;
         }
+
+        /* START SCREEN SPECIFIC */
+        .mode-card {
+            border: 2px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            text-align: left;
+            background: var(--glass-bg);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .mode-card:active { transform: scale(0.97); }
+        .mode-card.active {
+            border-color: var(--neon-blue);
+            background: color-mix(in srgb, var(--neon-blue) 15%, transparent);
+            box-shadow: 0 4px 15px color-mix(in srgb, var(--neon-blue) 20%, transparent);
+        }
+        .mode-card h3 { margin: 0 0 5px 0; color: var(--text-color); font-size: 18px; display: flex; justify-content: space-between;}
+        .mode-card p { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+        .check-icon { display: none; color: var(--neon-blue); }
+        .mode-card.active .check-icon { display: block; }
         
         .student-badge {
             display: inline-flex; align-items: center; gap: 8px; background: var(--glass-bg); padding: 8px 18px;
@@ -247,7 +273,7 @@
             <button class="theme-btn" onclick="toggleSound()" id="sound-btn" title="Toggle Sound"></button>
             <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle Theme"></button>
             
-            <!-- NEW: Quiz Mode Toggle -->
+            <!-- Quiz Mode Toggle (Mid-test) -->
             <div class="mode-switch" onclick="toggleQuizMode()" id="mode-btn" title="Toggle Quiz Mode">
                 <span id="mode-text">Mock Mode</span>
             </div>
@@ -283,10 +309,32 @@
         </button>
         <button class="f-btn btn-submit" id="btn-submit" onclick="submitTest()">
             <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            Calculate My Score
+            Calculate Score
         </button>
     </div>
 
+    <!-- START SCREEN MODAL -->
+    <div class="modal-overlay" id="startModal" style="z-index: 2000;">
+        <div class="modal-box" style="padding-top: 40px;">
+            <h2 style="color:var(--text-color); margin:0 0 20px 0;">Select Test Mode</h2>
+            
+            <div class="mode-card active" id="card-mock" onclick="selectStartMode('mock')">
+                <h3>General Mock <svg class="check-icon" width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></h3>
+                <p>Standard exam environment. Answers are hidden until the final report card.</p>
+            </div>
+            
+            <div class="mode-card" id="card-quiz" onclick="selectStartMode('quiz')">
+                <h3>Instant Quiz <svg class="check-icon" width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></h3>
+                <p>Learn as you go! Instantly see green/red feedback and hear sound effects.</p>
+            </div>
+
+            <button class="f-btn btn-next" style="width: 100%; justify-content: center; margin-top: 25px; font-size: 16px; padding: 16px;" onclick="beginExam()">
+                Start Test <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- REPORT CARD MODAL -->
     <div class="modal-overlay" id="resultModal">
         <div class="modal-box">
             <h2 style="color:var(--text-color); margin:0 0 15px 0; text-transform: uppercase; letter-spacing: 1px;">Report Card</h2>
@@ -307,7 +355,7 @@
                 <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"/><path d="M12 2v20"/><path d="m4.93 4.93 14.14 14.14"/><path d="m4.93 19.07 14.14-14.14"/></svg>
                 Check Solutions
             </button>
-            <button class="f-btn" style="background:transparent; border:1px solid var(--text-muted); color:var(--text-color); width:100%; justify-content:center;" onclick="exitSafely()">
+            <button class="f-btn" style="background:transparent; border:2px solid var(--glass-border); color:var(--text-color); width:100%; justify-content:center;" onclick="exitSafely()">
                 Back to Home
             </button>
             
@@ -339,7 +387,7 @@
             updateThemeIcon();
         }
         
-        // --- SOUND SYNC ---
+        // --- SOUND SYNC & WEB AUDIO API (Zero Latency) ---
         function updateSoundIcon() {
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             document.getElementById('sound-btn').innerHTML = isSoundOn ? svgSoundOn : svgSoundOff;
@@ -349,50 +397,77 @@
             const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
             localStorage.setItem('soundEnabled', !isSoundOn);
             updateSoundIcon();
-            if(!isSoundOn) playSound(); // Play sound immediately when toggling back on
+            if(!isSoundOn) playSound(); 
         }
 
         // Initialize icons on load
         updateThemeIcon();
         updateSoundIcon();
 
-        // --- SOUND SYSTEM ---
-        const popSound = new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAACAAAAA//8AAP//AAAAAA=="); 
-        const correctSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3");
-        const wrongSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3");
+        // High Performance Web Audio API Synthesizer (Instant sounds, no download delay)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
 
-        function playSound() {
-            const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
-            if(isSoundOn) { 
-                const sound = popSound.cloneNode();
-                sound.volume = 0.3; 
-                sound.play().catch(e => {}); 
+        function playSynth(type) {
+            if(localStorage.getItem('soundEnabled') === 'false') return;
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+            
+            if(type === 'correct') {
+                // Happy chime
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.5, now + 0.05);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } 
+            else if(type === 'wrong') {
+                // Error buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } 
+            else {
+                // UI Click/Pop
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.2, now + 0.02);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
             }
         }
 
-        function playFeedbackSound(isCorrect) {
-            const isSoundOn = localStorage.getItem('soundEnabled') !== 'false';
-            if(isSoundOn) {
-                const sound = isCorrect ? correctSound.cloneNode() : wrongSound.cloneNode();
-                sound.volume = 0.4;
-                sound.play().catch(e => {});
-            }
-        }
+        function playSound() { playSynth('click'); }
+        function playFeedbackSound(isCorrect) { playSynth(isCorrect ? 'correct' : 'wrong'); }
 
-       // --- CONFIG & CACHING LOGIC ---
-        // REPLACE THESE GIDs WITH YOUR ACTUAL SHEET 1 AND SHEET 2 GIDs
+
+        // --- CONFIG & CACHING LOGIC ---
         const SHEET_1_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=0&single=true&output=csv'; 
         const SHEET_2_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRO7WqDZ2QCRy-Hng8vdpVGTsSm4lp8n5gamqUSF5J1I-6jVtK1UZLHOYMN7p_xSpFI3RGuuPH3l35M/pub?gid=408771765&single=true&output=csv'; 
         
         const CACHE_KEY = 'adre_qbank_cache';
         const CACHE_TIME_KEY = 'adre_qbank_time';
-        const CACHE_DURATION = 24 * 60 * 60 * 1000; // Cache valid for 24 hours
+        const CACHE_DURATION = 24 * 60 * 60 * 1000;
         
         const SECONDS_PER_QUESTION = 60;
         
         let questions = [], currentQIndex = 0, userAnswers = {}, qStatus = {}, timeRemaining = 0, timerInterval;
         let isReviewMode = false, isSubmitted = false;
-        let isQuizMode = false; // NEW: Quiz mode state
+        let isQuizMode = false; 
+        let pendingQuizModeChoice = false; // Stores user choice from start screen
         let studentName = "Future Officer"; 
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -400,7 +475,39 @@
         const subjectName = urlParams.get('subject') || "Test";
         document.getElementById('test-subject-display').innerText = subjectName;
 
-        // --- NEW: QUIZ MODE TOGGLE ---
+        // --- START SCREEN & MODE SELECTION ---
+        function showStartModal() {
+            document.getElementById('startModal').style.display = 'flex';
+        }
+
+        function selectStartMode(mode) {
+            playSound();
+            document.getElementById('card-mock').classList.remove('active');
+            document.getElementById('card-quiz').classList.remove('active');
+            
+            document.getElementById(`card-${mode}`).classList.add('active');
+            pendingQuizModeChoice = (mode === 'quiz');
+        }
+
+        function beginExam() {
+            // Must resume audio context on first user interaction for Chrome/Android policies
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            playSound();
+            
+            document.getElementById('startModal').style.display = 'none';
+            
+            // Apply choice to header UI
+            if (pendingQuizModeChoice) {
+                isQuizMode = false; // force toggle to run
+                toggleQuizMode();
+            } else {
+                isQuizMode = false; // Mock mode
+            }
+            
+            initQuiz();
+        }
+
+        // --- MID-TEST QUIZ MODE TOGGLE ---
         function toggleQuizMode() {
             playSound();
             isQuizMode = !isQuizMode;
@@ -413,17 +520,18 @@
                 btn.classList.remove('quiz-active');
                 txt.innerText = "Mock Mode";
             }
-            // Refresh current question layout if it's already on screen
             if(questions.length > 0) loadQuestion(currentQIndex);
         }
 
         // --- EXIT PROTECTION ---
         window.onbeforeunload = function() {
-            if (!isSubmitted) return "You have not submitted the test.";
+            if (!isSubmitted && questions.length > 0 && document.getElementById('startModal').style.display === 'none') {
+                return "You have not submitted the test.";
+            }
         };
         function attemptExit() {
             playSound();
-            if(!isSubmitted) {
+            if(!isSubmitted && questions.length > 0 && document.getElementById('startModal').style.display === 'none') {
                 if(confirm("⚠️ Warning: Your progress will be lost.\n\nAre you sure you want to exit?")) window.location.href = 'index.html';
             } else {
                 window.location.href = 'index.html';
@@ -439,49 +547,35 @@
             const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
             const now = Date.now();
 
-            // 1. If we have fresh cache, use it immediately (Zero Delay)
             if (cachedData && cachedTime && (now - parseInt(cachedTime)) < CACHE_DURATION) {
                 parseCSV(cachedData);
-                // 2. Silently fetch new updates in background to keep cache fresh for next time
                 updateCacheSilently();
             } else {
-                // 3. Otherwise, fetch, cache, and parse
                 await fetchAndCache();
             }
         };
 
         async function fetchAndCombineSheets() {
-            // Fetch both sheets at the exact same time
             const [response1, response2] = await Promise.all([
                 fetch(SHEET_1_URL),
                 fetch(SHEET_2_URL)
             ]);
-
             if (!response1.ok || !response2.ok) throw new Error("Failed to load one or more sheets");
-
             const text1 = await response1.text();
             let text2 = await response2.text();
-
-            // Remove the header row from Sheet 2 so we don't have a header stuck in the middle of our data
             const text2Lines = text2.split(/\r?\n/);
             text2Lines.shift(); 
             text2 = text2Lines.join('\n');
-
-            // Combine them
             return text1 + '\n' + text2;
         }
 
         async function fetchAndCache() {
             try {
                 const combinedCSV = await fetchAndCombineSheets();
-                
-                // Save the combined data to localStorage
                 localStorage.setItem(CACHE_KEY, combinedCSV);
                 localStorage.setItem(CACHE_TIME_KEY, Date.now());
-                
                 parseCSV(combinedCSV);
             } catch (e) {
-                // Fallback to stale cache if offline
                 const staleData = localStorage.getItem(CACHE_KEY);
                 if (staleData) {
                     parseCSV(staleData);
@@ -494,21 +588,16 @@
         async function updateCacheSilently() {
             try {
                 const combinedCSV = await fetchAndCombineSheets();
-                // Update cache quietly in the background
                 localStorage.setItem(CACHE_KEY, combinedCSV);
                 localStorage.setItem(CACHE_TIME_KEY, Date.now());
-            } catch (e) { 
-                /* Ignore silent errors in background */ 
-            }
+            } catch (e) { }
         }
 
         function parseCSV(csvText) {
-            const rows = csvText.split(/\r?\n/).slice(1); // Skip sheet 1 header
-            
+            const rows = csvText.split(/\r?\n/).slice(1);
             questions = [];
             rows.forEach(row => {
                 if(row.trim().length === 0) return; 
-                
                 const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(x => x.replace(/^"|"$/g, '').trim());
                 if(c.length >= 7 && c[0] === testID) {
                     questions.push({ q: c[1], options: [c[2], c[3], c[4], c[5]], correct: parseInt(c[6]) });
@@ -516,10 +605,9 @@
             });
             
             if (questions.length === 0) {
-                document.getElementById('question-card').innerHTML = `
-                    <p style="text-align:center; color:var(--wrong-red);">No questions found for Test ID: <b>${testID}</b></p>`;
+                document.getElementById('question-card').innerHTML = `<p style="text-align:center; color:var(--wrong-red);">No questions found for Test ID: <b>${testID}</b></p>`;
             } else {
-                initQuiz();
+                showStartModal(); // Trigger the start screen before the quiz!
             }
         }
 
@@ -542,7 +630,7 @@
             loadQuestion(0);
         }
 
-        // --- NEW: VERIFY QUESTION ON GOOGLE ---
+        // --- GOOGLE VERIFY & REPORTING ---
         function verifyQuestionOnGoogle() {
             playSound();
             const q = questions[currentQIndex];
@@ -550,19 +638,13 @@
             window.open("https://www.google.com/search?q=" + query, "_blank");
         }
 
-        // --- UPDATED: REPORT QUESTION LOGIC ---
         function reportQuestion() {
             playSound();
-            
-            // Getting the actual data you requested
-            const testNumberText = subjectName; // e.g., "PET Mock 1"
-            const qNoText = currentQIndex + 1;  // e.g., "25"
-            
-            // Your Google Form link
+            const testNumberText = subjectName; 
+            const qNoText = currentQIndex + 1;  
             const formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLSdxAZVkTzwjUvPwhfB1W176ib2ZI-jc3jahhxw1dsIgGn2uNA/viewform?usp=pp_url";
             
-            // IMPORTANT: Replace 'entry.111' with your real Google form entry ID for "Test Number"
-            // Replace 'entry.222' with your real Google form entry ID for "Question Number"
+            // PLEASE CHANGE 'entry.111' AND 'entry.222' TO YOUR ACTUAL GOOGLE FORM IDS
             const prefilledURL = formBaseURL + 
                 "&entry.111=" + encodeURIComponent(testNumberText) + 
                 "&entry.222=" + encodeURIComponent(qNoText);
@@ -575,17 +657,16 @@
             const q = questions[idx];
             const el = document.getElementById('question-card');
             
-            // NEW: Injected the Verify Button next to the Report button
             let html = `
                 <div class="q-meta">
                     <span class="q-badge">Question ${idx + 1} of ${questions.length}</span>
-                    <div style="display:flex; gap: 15px;">
+                    <div style="display:flex; gap: 8px;">
                         <span class="report-link" style="color:var(--neon-blue);" onclick="verifyQuestionOnGoogle()">
-                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                             Verify
                         </span>
                         <span class="report-link" onclick="reportQuestion()">
-                            <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+                            <svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
                             Report
                         </span>
                     </div>
@@ -596,7 +677,6 @@
             q.options.forEach((opt, i) => {
                 let cls = 'opt-btn';
                 
-                // NEW: Logic applies colors instantly if in Quiz Mode and an answer was picked
                 if(isReviewMode || (isQuizMode && userAnswers[idx] !== null)) {
                     if(i === q.correct) cls += ' correct'; 
                     else if(userAnswers[idx] === i) cls += ' wrong';
@@ -605,11 +685,10 @@
                 }
                 
                 const alpha = String.fromCharCode(65 + i);
-                // Also disable buttons if in review mode OR if quiz mode answer is already submitted
                 const isDisabled = isReviewMode || (isQuizMode && userAnswers[idx] !== null) ? 'disabled' : '';
 
                 html += `<button class="${cls}" onclick="selectOption(${i})" ${isDisabled}>
-                            <span style="font-weight:bold; color:var(--neon-blue); opacity:0.8; margin-right:5px;">${alpha}.</span> 
+                            <span style="font-weight:bold; color:var(--neon-blue); opacity:0.8; margin-right:5px; width:20px; display:inline-block;">${alpha}.</span> 
                             ${opt}
                          </button>`;
             });
@@ -666,18 +745,15 @@
         // --- ACTIONS ---
         function selectOption(i) {
             if(isReviewMode) return;
-            
-            // NEW: Prevent changing answer if already answered in Quiz Mode
             if(isQuizMode && userAnswers[currentQIndex] !== null) return;
             
             userAnswers[currentQIndex] = i;
             if(qStatus[currentQIndex] !== 'marked') qStatus[currentQIndex] = 'visited';
             
-            // NEW: Instant feedback logic for Quiz Mode
             if(isQuizMode) {
                 const isCorrect = (i === questions[currentQIndex].correct);
                 playFeedbackSound(isCorrect);
-                loadQuestion(currentQIndex); // Reload to show green/red colors immediately
+                loadQuestion(currentQIndex); 
             } else {
                 playSound();
                 loadQuestion(currentQIndex); 
@@ -726,8 +802,6 @@
             let score = 0;
             questions.forEach((q, i) => { if(userAnswers[i] === q.correct) score++; });
             const pct = Math.round((score/questions.length)*100);
-            
-         
 
             document.getElementById('studentNameDisplay').innerHTML = `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${studentName}`;
             document.getElementById('scoreVal').innerText = pct + "%";
