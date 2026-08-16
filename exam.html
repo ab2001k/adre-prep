@@ -425,7 +425,7 @@
         updateThemeIcon();
         updateSoundIcon();
 
-        // High Performance Web Audio API Synthesizer (Instant sounds, no lag)
+        // High Performance Web Audio API Synthesizer
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContext();
 
@@ -519,7 +519,9 @@
             } else {
                 isQuizMode = false; 
             }
-            initQuiz();
+            
+            // Start the timer ONLY when the Start button is clicked!
+            startTimer(); 
         }
 
         // --- MID-TEST QUIZ MODE TOGGLE ---
@@ -548,7 +550,6 @@
         function attemptExit() {
             playSound();
             if(!isSubmitted && questions.length > 0 && document.getElementById('startModal').style.display === 'none') {
-                // Show Custom Native Modal instead of javascript alert
                 document.getElementById('exitModal').style.display = 'flex';
             } else {
                 window.location.href = 'index.html';
@@ -562,7 +563,7 @@
         
         function confirmExit() {
             playSound();
-            isSubmitted = true; // Prevents the browser's own alert from popping up
+            isSubmitted = true; 
             window.location.href = 'index.html';
         }
 
@@ -634,15 +635,21 @@
             if (questions.length === 0) {
                 document.getElementById('question-card').innerHTML = `<p style="text-align:center; color:var(--wrong-red);">No questions found for Test ID: <b>${testID}</b></p>`;
             } else {
+                prepareQuizUI(); 
                 showStartModal(); 
             }
         }
 
         const svgStar = `<svg class="star-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
 
-        function initQuiz() {
+        // THIS FUNCTION LOADS THE UI IN THE BACKGROUND BEFORE STARTING TIMER
+        function prepareQuizUI() {
             timeRemaining = questions.length * SECONDS_PER_QUESTION;
-            startTimer();
+            
+            // Set initial timer text so it doesn't say 00:00
+            let m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+            document.getElementById('timer-text').innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            
             const p = document.getElementById('palette-container');
             p.innerHTML = '';
             questions.forEach((_, i) => {
@@ -654,7 +661,7 @@
                 p.appendChild(btn);
             });
             
-            // STRICTLY initializes answers to undefined to prevent any auto-showing bugs
+            // Initialize user answers to undefined strictly to prevent auto-show bugs
             questions.forEach((_, i) => { userAnswers[i] = undefined; qStatus[i] = 'not-visited'; });
             
             loadQuestion(0);
@@ -674,7 +681,6 @@
             const qNoText = currentQIndex + 1;  
             const formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLSdxAZVkTzwjUvPwhfB1W176ib2ZI-jc3jahhxw1dsIgGn2uNA/viewform?usp=pp_url";
             
-            // PLEASE CHANGE 'entry.111' AND 'entry.222' TO YOUR ACTUAL GOOGLE FORM IDS
             const prefilledURL = formBaseURL + 
                 "&entry.111=" + encodeURIComponent(testNumberText) + 
                 "&entry.222=" + encodeURIComponent(qNoText);
@@ -702,7 +708,6 @@
                     </div>
                 </div>
                 
-                <!-- Added Q1, Q2 indicator here -->
                 <div class="q-text">
                     <span style="color:var(--neon-blue); font-weight:bold; margin-right:5px;">Q${idx + 1}.</span> 
                     ${q.q}
@@ -710,7 +715,7 @@
                 
                 <div>`;
             
-            // Bulletproof check: Has the user physically picked an option for this question yet?
+            // Bulletproof check to ensure option colors only show if clicked
             const hasAnswered = typeof userAnswers[idx] === 'number';
 
             q.options.forEach((opt, i) => {
@@ -720,7 +725,6 @@
                     if(i === q.correct) cls += ' correct'; 
                     else if(userAnswers[idx] === i) cls += ' wrong';
                 } else {
-                    // Only apply selected class if the user actually clicked this option
                     if(hasAnswered && userAnswers[idx] === i) cls += ' selected';
                 }
                 
